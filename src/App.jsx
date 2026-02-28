@@ -74,6 +74,12 @@ const DATA = {
                 { label: "5+", pct: 33 },
             ],
         },
+        byResub: [
+            { freq: "0×/wk", resubYes: 0, resubThinking: 25, resubNo: 75 },
+            { freq: "1–2×/wk", resubYes: 14, resubThinking: 45, resubNo: 41 },
+            { freq: "3–4×/wk", resubYes: 45, resubThinking: 38, resubNo: 17 },
+            { freq: "5+×/wk", resubYes: 57, resubThinking: 32, resubNo: 11 },
+        ],
     },
     features: [
         { label: "Live games", pct: 96, count: 128 },
@@ -100,6 +106,11 @@ const DATA = {
         { label: "3 yrs", value: 25, pct: 19 },
         { label: "4 yrs", value: 5, pct: 4 },
         { label: "5+ yrs", value: 21, pct: 16 },
+    ],
+    tenureByResub: [
+        { group: "Re-subscribers", avgYears: 3.7, color: "#22c55e" },
+        { group: "Still thinking", avgYears: 2.1, color: "#fbbf24" },
+        { group: "Leaving", avgYears: 1.5, color: "#e8354f" },
     ],
     commentThemes: [
         { theme: "Blackout removal", count: 8, pct: 14 },
@@ -218,6 +229,95 @@ const ResubByTierChart = () => {
         </div>
     );
 };
+
+// NEW: Usage frequency vs re-subscription intent chart
+const UsageRetentionChart = () => {
+    const categories = [
+        { key: "resubYes", label: "Will re-sub", color: C.green },
+        { key: "resubThinking", label: "Still thinking", color: C.gold },
+        { key: "resubNo", label: "Will leave", color: C.accent },
+    ];
+    return (
+        <div>
+            <div style={{ display: "flex", gap: 16, marginBottom: 20, justifyContent: "center" }}>
+                {categories.map(c => (
+                    <div key={c.key} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.textMuted }}>
+                        <div style={{ width: 10, height: 10, borderRadius: 2, background: c.color }} />
+                        {c.label}
+                    </div>
+                ))}
+            </div>
+            {DATA.usage.byResub.map(row => (
+                <div key={row.freq} style={{ marginBottom: 16 }}>
+                    <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 6, fontWeight: 600 }}>{row.freq}</div>
+                    <div style={{ display: "flex", height: 28, borderRadius: 4, overflow: "hidden", gap: 2 }}>
+                        {categories.map(c => (
+                            <div key={c.key} style={{
+                                width: `${row[c.key]}%`, background: c.color, transition: "width 0.8s ease",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                fontSize: 10, fontWeight: 700, color: "#fff",
+                                minWidth: row[c.key] > 8 ? 34 : 0,
+                            }}>
+                                {row[c.key] > 8 ? `${row[c.key]}%` : ""}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
+            {/* Callout stat */}
+            <div style={{
+                display: "flex", gap: 12, marginTop: 20,
+                padding: "14px 16px", borderRadius: 8,
+                background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)",
+            }}>
+                <div style={{ textAlign: "center", minWidth: 70 }}>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: C.green, fontFamily: "'Barlow Condensed', sans-serif", lineHeight: 1 }}>88%</div>
+                    <div style={{ fontSize: 10, color: C.textDim, marginTop: 3 }}>of re-subscribers</div>
+                </div>
+                <div style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.6, borderLeft: `1px solid ${C.border}`, paddingLeft: 12 }}>
+                    use the app <strong style={{ color: C.text }}>3+ times per week</strong>. Among subscribers who use the app only 1–2×/week, just <strong style={{ color: C.accentLight }}>14%</strong> plan to re-subscribe. Usage frequency is the single strongest predictor of retention.
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// NEW: Tenure by re-sub group chart
+const TenureChurnChart = () => (
+    <div>
+        <div style={{ display: "flex", gap: 16, alignItems: "flex-end", justifyContent: "center", marginBottom: 12 }}>
+            {DATA.tenureByResub.map(d => (
+                <div key={d.group} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: d.color, marginBottom: 6 }}>{d.avgYears} yrs</span>
+                    <div style={{
+                        width: "70%", height: `${(d.avgYears / 4) * 140}px`,
+                        background: d.color,
+                        borderRadius: "6px 6px 0 0", opacity: 0.85,
+                        transition: "height 0.6s ease",
+                    }} />
+                </div>
+            ))}
+        </div>
+        <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
+            {DATA.tenureByResub.map(d => (
+                <div key={d.group} style={{ flex: 1, textAlign: "center", fontSize: 11, color: C.textMuted }}>{d.group}</div>
+            ))}
+        </div>
+        <div style={{
+            display: "flex", gap: 12, marginTop: 20,
+            padding: "14px 16px", borderRadius: 8,
+            background: "rgba(232,53,79,0.07)", border: "1px solid rgba(232,53,79,0.2)",
+        }}>
+            <div style={{ textAlign: "center", minWidth: 70 }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: C.accentLight, fontFamily: "'Barlow Condensed', sans-serif", lineHeight: 1 }}>2.2 yr</div>
+                <div style={{ fontSize: 10, color: C.textDim, marginTop: 3 }}>gap</div>
+            </div>
+            <div style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.6, borderLeft: `1px solid ${C.border}`, paddingLeft: 12 }}>
+                Subscribers leaving average just <strong style={{ color: C.accentLight }}>1.5 years of tenure</strong>, vs <strong style={{ color: C.green }}>3.7 years</strong> for re-subscribers. The first 1–2 years are the critical retention window — if subscribers don't find value early, they're gone.
+            </div>
+        </div>
+    </div>
+);
 
 // ── Tab system ──
 const TABS = [
@@ -592,6 +692,17 @@ export default function NBADashboard() {
                                 61% of subscribers have been on League Pass for 1–2 years, suggesting a relatively young subscriber base. Retention past year 2 appears to be a challenge — only 39% have been subscribed for 3+ years.
                             </Insight>
                         </div>
+
+                        <SectionTitle number="5">Tenure vs. Churn — The Critical Retention Window</SectionTitle>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
+                            <p style={{ fontSize: 13, color: C.textMuted, margin: "0 0 20px", lineHeight: 1.6 }}>
+                                Average subscriber tenure broken down by re-subscription intent reveals a stark pattern:
+                            </p>
+                            <TenureChurnChart />
+                            <Insight>
+                                Newer subscribers churn fastest. Those planning to leave average just 1.5 years of tenure, vs 3.7 years for confirmed re-subscribers. The first 1–2 years are the critical retention window — winning subscribers early and building habit during that period is the highest-leverage retention investment.
+                            </Insight>
+                        </div>
                     </div>
                 )}
 
@@ -625,7 +736,59 @@ export default function NBADashboard() {
                             </Insight>
                         </div>
 
-                        <SectionTitle number="3">Churn Risk Matrix</SectionTitle>
+                        <SectionTitle number="3">Price Sensitivity Among the Undecided</SectionTitle>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+                                <div style={{
+                                    background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.2)",
+                                    borderRadius: 8, padding: 16, textAlign: "center",
+                                }}>
+                                    <div style={{ fontSize: 32, fontWeight: 700, color: C.gold, fontFamily: "'Barlow Condensed', sans-serif" }}>14%</div>
+                                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>of open-ended comments</div>
+                                    <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>mention pricing as top concern</div>
+                                </div>
+                                <div style={{
+                                    background: "rgba(232,53,79,0.08)", border: "1px solid rgba(232,53,79,0.2)",
+                                    borderRadius: 8, padding: 16, textAlign: "center",
+                                }}>
+                                    <div style={{ fontSize: 32, fontWeight: 700, color: C.accentLight, fontFamily: "'Barlow Condensed', sans-serif" }}>42%</div>
+                                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>of Standard are "still thinking"</div>
+                                    <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>with price as the swing factor</div>
+                                </div>
+                                <div style={{
+                                    background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)",
+                                    borderRadius: 8, padding: 16, textAlign: "center",
+                                }}>
+                                    <div style={{ fontSize: 32, fontWeight: 700, color: C.blueLight, fontFamily: "'Barlow Condensed', sans-serif" }}>62%</div>
+                                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>Premium re-sub rate</div>
+                                    <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>same price concern, less churn</div>
+                                </div>
+                            </div>
+
+                            <div style={{ fontSize: 13, color: C.textMuted, marginBottom: 14, lineHeight: 1.6 }}>
+                                Representative comments from <strong style={{ color: C.gold }}>"still thinking"</strong> subscribers citing price:
+                            </div>
+                            {[
+                                { tier: "Standard", quote: "I just would like to see the price dropped" },
+                                { tier: "Standard", quote: "I will probably cancel to save some money" },
+                                { tier: "Standard", quote: "For new and long-term members, a discount code to renew League Pass. Also, a discount on team merch." },
+                                { tier: "Standard", quote: "The value isn't there at the current price point given how many games are blacked out" },
+                            ].map((q, i) => (
+                                <div key={i} style={{
+                                    fontSize: 13, color: C.textMuted, marginBottom: 10, paddingLeft: 12,
+                                    borderLeft: `2px solid rgba(251,191,36,0.4)`, lineHeight: 1.5,
+                                }}>
+                                    "{q.quote}"
+                                    <span style={{ fontSize: 11, color: C.textDim, marginLeft: 8 }}>— {q.tier} subscriber</span>
+                                </div>
+                            ))}
+
+                            <Insight>
+                                Price sensitivity is high among the undecided — but the real issue is <em>perceived value</em>, not absolute price. Premium subscribers pay more and churn less (62% vs 32%), suggesting the Standard tier's value proposition isn't landing. The answer isn't necessarily a discount; it's making Standard subscribers feel they're getting Premium-level value for their money.
+                            </Insight>
+                        </div>
+
+                        <SectionTitle number="4">Churn Risk Matrix</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                                 <div style={{
@@ -693,7 +856,18 @@ export default function NBADashboard() {
                             </Insight>
                         </div>
 
-                        <SectionTitle number="2">Features Used</SectionTitle>
+                        <SectionTitle number="2">Usage Frequency as a Retention Predictor</SectionTitle>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
+                            <p style={{ fontSize: 13, color: C.textMuted, margin: "0 0 16px", lineHeight: 1.6 }}>
+                                Re-subscription intent broken down by how often subscribers use the app each week:
+                            </p>
+                            <UsageRetentionChart />
+                            <Insight>
+                                Usage frequency is the single strongest predictor of retention. The jump from 1–2× to 3–4× per week is the critical threshold — it triples the re-subscribe rate (14% → 45%). Any product investment that increases weekly session frequency directly improves retention.
+                            </Insight>
+                        </div>
+
+                        <SectionTitle number="3">Features Used</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
                             {DATA.features.map(d => (
                                 <div key={d.label} style={{ marginBottom: 16 }}>
@@ -709,7 +883,7 @@ export default function NBADashboard() {
                             </Insight>
                         </div>
 
-                        <SectionTitle number="3">Platform Fragmentation</SectionTitle>
+                        <SectionTitle number="4">Platform Fragmentation</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
                             {DATA.platforms.map(d => (
                                 <div key={d.label} style={{ marginBottom: 16 }}>
@@ -725,7 +899,7 @@ export default function NBADashboard() {
                             </Insight>
                         </div>
 
-                        <SectionTitle number="4">Access Method</SectionTitle>
+                        <SectionTitle number="5">Access Method</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
                                 {DATA.access.map(d => (
@@ -888,7 +1062,6 @@ export default function NBADashboard() {
                                 background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
                                 marginBottom: 20, overflow: "hidden",
                             }}>
-                                {/* Theme header */}
                                 <div style={{
                                     padding: "16px 20px", borderBottom: `1px solid ${C.border}`,
                                     background: `linear-gradient(135deg, ${t.color}11, transparent)`,
@@ -913,7 +1086,6 @@ export default function NBADashboard() {
                                     </span>
                                 </div>
 
-                                {/* Survey connection banner */}
                                 <div style={{
                                     padding: "10px 20px", background: "rgba(59,130,246,0.06)",
                                     borderBottom: `1px solid ${C.border}`, fontSize: 12, color: C.blueLight,
@@ -923,7 +1095,6 @@ export default function NBADashboard() {
                                     <span>Survey connection: {t.surveyLink}</span>
                                 </div>
 
-                                {/* Quotes */}
                                 <div style={{ padding: "16px 20px" }}>
                                     {t.quotes.map((q, qi) => (
                                         <div key={qi} style={{
@@ -944,7 +1115,6 @@ export default function NBADashboard() {
                                     ))}
                                 </div>
 
-                                {/* Insight */}
                                 <div style={{
                                     padding: "14px 20px", borderTop: `1px solid ${C.border}`,
                                     background: `${t.color}08`, fontSize: 13, color: C.textMuted, lineHeight: 1.6,
@@ -958,7 +1128,6 @@ export default function NBADashboard() {
                         <SectionTitle number="3">Interview vs. Survey — What Interviews Uniquely Revealed</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, fontSize: 13 }}>
-                                {/* Header */}
                                 <div style={{ padding: "10px 12px", background: C.accent, borderRadius: "8px 0 0 0", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>
                                     Survey Captured
                                 </div>
@@ -1079,6 +1248,16 @@ export default function NBADashboard() {
                                     color: C.gold,
                                 },
                                 {
+                                    title: "📈 Usage = Retention",
+                                    body: "88% of re-subscribers use the app 3+ times/week. Subscribers using it only 1–2×/week re-sub at just 14%. Increasing session frequency is the highest-leverage retention lever.",
+                                    color: C.green,
+                                },
+                                {
+                                    title: "⏱️ Critical Window",
+                                    body: "Subscribers who leave average 1.5 years of tenure vs 3.7 years for re-subscribers. The first 1–2 years are make-or-break — onboarding and early habit formation are essential.",
+                                    color: C.purple,
+                                },
+                                {
                                     title: "🔀 Platform Fragmentation",
                                     body: "Subscribers use ~3 other platform categories for NBA content. League Pass isn't winning the 'daily NBA destination' battle against social media and ESPN.",
                                     color: C.blueLight,
@@ -1087,16 +1266,6 @@ export default function NBADashboard() {
                                     title: "🚫 Blackout Pain",
                                     body: "Blackouts are the #1 qualitative complaint. One subscriber literally pays for a second service to watch blacked-out home games. This drives churn directly.",
                                     color: C.orange,
-                                },
-                                {
-                                    title: "💡 Feature Discovery Gap",
-                                    body: "63–66% of subscribers don't use Replays or Stats. The product has features beyond live streaming, but users don't know about or value them.",
-                                    color: C.green,
-                                },
-                                {
-                                    title: "💰 Value Perception",
-                                    body: "Pricing is the #2 complaint despite a price freeze this year. Premium has 2× better retention — the answer may not be lower prices but better perceived value.",
-                                    color: C.purple,
                                 },
                             ].map((card, i) => (
                                 <div key={i} style={{
