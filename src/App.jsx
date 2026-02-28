@@ -2,15 +2,15 @@ import { useState } from "react";
 
 // ── Color palette: NBA-inspired dark theme ──
 const C = {
-    bg: "#0a0e1a",
-    card: "#111827",
-    cardHover: "#1a2235",
-    border: "#1e293b",
-    accent: "#c9082a",    // NBA red
+    bg: "#0b1221",        // Deep NBA-blue tinted dark background
+    card: "#131f38",      // Slightly lighter NBA blue card
+    cardHover: "#1a2a4c",
+    border: "#233863",
+    accent: "#C9082A",    // Official NBA Red
     accentLight: "#e8354f",
     gold: "#fbbf24",
-    blue: "#1d4ed8",
-    blueLight: "#3b82f6",
+    blue: "#17408B",      // Official NBA Blue
+    blueLight: "#2c5ec2", // Lighter NBA blue for visibility on dark bg
     green: "#22c55e",
     orange: "#f97316",
     purple: "#a855f7",
@@ -370,6 +370,19 @@ const INTERVIEWEES = [
         otherApps: "YouTube, The Athletic (podcasts)",
         color: C.gold,
     },
+    {
+        name: "Michael Evans",
+        tier: "Non-subscriber",
+        emoji: "💜",
+        team: "Lakers",
+        location: "SF (out-of-market)",
+        tenure: "Never subscribed",
+        usage: "1/wk regular season, daily post-season",
+        resubscribe: "N/A (Would sub if cheaper)",
+        platform: "YouTube TV, ESPN/NBC, illegal streams",
+        otherApps: "Reddit (r/nba), YouTube, Instagram, ESPN app",
+        color: C.purple,
+    },
 ];
 
 const INTERVIEW_THEMES = [
@@ -431,6 +444,11 @@ const INTERVIEW_THEMES = [
                 person: "Nick Sun",
                 text: "When you do illegal streams that have live comments, the comments get pretty crazy/racist.",
                 context: "Even illegal streams have social features (live chat) that LP lacks — but content moderation is terrible",
+            },
+            {
+                person: "Michael Evans",
+                text: "Yes [illegal streams are a negative experience], but it’s free. Plus ad block helps.",
+                context: "Tolerates poor UX of illegal streams because the price (free) outweighs the friction.",
             },
         ],
         insight: "Illegal streams are a serious competitive threat that the survey completely missed. They offer zero blackouts, social features (live comments), and no cost. League Pass needs to offer something illegal streams can't — quality, reliability, exclusive content, and community that's actually moderated.",
@@ -494,6 +512,11 @@ const INTERVIEW_THEMES = [
                 text: "When you do illegal streams that have live comments, the comments get pretty crazy/racist.",
                 context: "Users want social features but need moderation — an opportunity for LP to do it right",
             },
+            {
+                person: "Michael Evans",
+                text: "r/nba has all the content you need besides live games for free. Plus the comments can be funny/as engaging as actually watching the game. And I think a lot of the interesting parts of the NBA happen outside of the games anyway.",
+                context: "Finds the community and meta-narrative on Reddit more engaging and accessible than the games themselves.",
+            },
         ],
         insight: "Fans already have rich community engagement around basketball — it just happens on Reddit, Twitter, and YouTube instead of League Pass. Arvind explicitly asks for this. The opportunity is to bring moderated social engagement into the LP experience to increase daily stickiness and off-season retention.",
     },
@@ -556,6 +579,11 @@ const INTERVIEW_THEMES = [
                 text: "Overall it's a good product when you want it to work. 3 years. Best last year on YouTube TV.",
                 context: "Even a loyal subscriber frames value conditionally — 'when you want it to work'",
             },
+            {
+                person: "Michael Evans",
+                text: "I consider myself a huge nba fan... However, I don’t feel like I need to watch every game (only the biggest) so league pass doesn’t seem worth it to me... [Would subscribe] If it was cheaper.",
+                context: "The all-you-can-eat model doesn't fit his needs; the price is too high for the volume he wants.",
+            },
         ],
         insight: "Re-subscription decisions are driven by team performance and household dynamics, not product loyalty. This means LP can't control its churn drivers unless it builds value that transcends any single team's season — year-round engagement, community, and content that keeps fans connected even when their team is losing.",
     },
@@ -573,7 +601,7 @@ export default function NBADashboard() {
 
             {/* Header */}
             <div style={{
-                background: "linear-gradient(135deg, #0a0e1a 0%, #1a0a0f 50%, #0a0e1a 100%)",
+                background: "linear-gradient(135deg, #0b1221 0%, #1a0a0f 50%, #0b1221 100%)",
                 borderBottom: `1px solid ${C.border}`, padding: "28px 32px 20px",
             }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
@@ -1019,10 +1047,10 @@ export default function NBADashboard() {
                     <div>
                         <SectionTitle number="1">Interviewee Profiles</SectionTitle>
                         <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 20, lineHeight: 1.6 }}>
-                            3 in-depth interviews conducted with League Pass subscribers / former subscribers. These provide the causal "why" behind the survey's quantitative findings.
+                            4 in-depth interviews conducted with League Pass subscribers / former subscribers / fans. These provide the causal "why" behind the survey's quantitative findings.
                         </p>
 
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                             {INTERVIEWEES.map(p => (
                                 <div key={p.name} style={{
                                     background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
