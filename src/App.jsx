@@ -1,16 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // ── Color palette: NBA-inspired dark theme ──
 const C = {
-    bg: "#0b1221",        // Deep NBA-blue tinted dark background
-    card: "#131f38",      // Slightly lighter NBA blue card
+    bg: "#0b1221",
+    card: "#131f38",
     cardHover: "#1a2a4c",
     border: "#233863",
-    accent: "#C9082A",    // Official NBA Red
+    accent: "#C9082A",
     accentLight: "#e8354f",
     gold: "#fbbf24",
-    blue: "#17408B",      // Official NBA Blue
-    blueLight: "#2c5ec2", // Lighter NBA blue for visibility on dark bg
+    blue: "#17408B",
+    blueLight: "#2c5ec2",
     green: "#22c55e",
     orange: "#f97316",
     purple: "#a855f7",
@@ -124,6 +124,17 @@ const DATA = {
     ],
 };
 
+// ── Hook for responsive breakpoints ──
+function useBreakpoint() {
+    const [width, setWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1024);
+    useEffect(() => {
+        const onResize = () => setWidth(window.innerWidth);
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
+    return { isMobile: width < 640, isTablet: width >= 640 && width < 1024, isDesktop: width >= 1024, width };
+}
+
 // ── Reusable components ──
 
 const Bar = ({ pct, color = C.blueLight, height = 20, animate = true }) => (
@@ -139,19 +150,20 @@ const Bar = ({ pct, color = C.blueLight, height = 20, animate = true }) => (
     </div>
 );
 
-const StatCard = ({ label, value, sub, accent = false }) => (
+const StatCard = ({ label, value, sub, accent = false, isMobile }) => (
     <div style={{
         background: C.card, border: `1px solid ${C.border}`,
-        borderRadius: 12, padding: "20px 16px", textAlign: "center",
+        borderRadius: 12, padding: isMobile ? "16px 12px" : "20px 16px", textAlign: "center",
         borderTop: accent ? `3px solid ${C.accent}` : `1px solid ${C.border}`,
+        minWidth: 0,
     }}>
-        <div style={{ fontSize: 32, fontWeight: 700, color: accent ? C.accentLight : C.text, fontFamily: "'Barlow Condensed', sans-serif" }}>
+        <div style={{ fontSize: isMobile ? 26 : 32, fontWeight: 700, color: accent ? C.accentLight : C.text, fontFamily: "'Barlow Condensed', sans-serif" }}>
             {value}
         </div>
-        <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4, textTransform: "uppercase", letterSpacing: 1 }}>
+        <div style={{ fontSize: isMobile ? 10 : 12, color: C.textMuted, marginTop: 4, textTransform: "uppercase", letterSpacing: 1 }}>
             {label}
         </div>
-        {sub && <div style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>{sub}</div>}
+        {sub && <div style={{ fontSize: isMobile ? 10 : 11, color: C.textDim, marginTop: 4 }}>{sub}</div>}
     </div>
 );
 
@@ -161,16 +173,16 @@ const SectionTitle = ({ children, number }) => (
             <span style={{
                 background: C.accent, color: "#fff", fontWeight: 700, fontSize: 13,
                 width: 28, height: 28, borderRadius: "50%", display: "flex",
-                alignItems: "center", justifyContent: "center",
+                alignItems: "center", justifyContent: "center", flexShrink: 0,
                 fontFamily: "'Barlow Condensed', sans-serif",
             }}>{number}</span>
         )}
         <h2 style={{
             margin: 0, fontSize: 20, fontWeight: 700, color: C.text,
             fontFamily: "'Barlow Condensed', sans-serif", textTransform: "uppercase",
-            letterSpacing: 1.5,
+            letterSpacing: 1.5, whiteSpace: "nowrap",
         }}>{children}</h2>
-        <div style={{ flex: 1, height: 1, background: C.border }} />
+        <div style={{ flex: 1, height: 1, background: C.border, minWidth: 20 }} />
     </div>
 );
 
@@ -183,6 +195,26 @@ const Insight = ({ children }) => (
     }}>
         <span style={{ color: C.accentLight, fontWeight: 600, marginRight: 6 }}>💡 MRD Insight:</span>
         {children}
+    </div>
+);
+
+const Callout = ({ leftValue, leftSub, children, bgColor, borderColor }) => (
+    <div style={{
+        display: "flex", flexWrap: "wrap", gap: 12, marginTop: 20, padding: "14px 16px",
+        borderRadius: 8, alignItems: "center",
+        background: bgColor, border: `1px solid ${borderColor}`,
+    }}>
+        <div style={{ textAlign: "center", minWidth: 70 }}>
+            {leftValue}
+            {leftSub && <div style={{ fontSize: 10, color: C.textDim, marginTop: 3 }}>{leftSub}</div>}
+        </div>
+        <div style={{
+            fontSize: 12, lineHeight: 1.6, color: C.textMuted,
+            borderLeft: `1px solid ${C.border}`, paddingLeft: 12,
+            flex: "1 1 200px",
+        }}>
+            {children}
+        </div>
     </div>
 );
 
@@ -230,7 +262,7 @@ const ResubByTierChart = () => {
     );
 };
 
-// NEW: Usage frequency vs re-subscription intent chart
+// Usage frequency vs re-subscription intent chart
 const UsageRetentionChart = () => {
     const categories = [
         { key: "resubYes", label: "Will re-sub", color: C.green },
@@ -264,28 +296,24 @@ const UsageRetentionChart = () => {
                     </div>
                 </div>
             ))}
-            {/* Callout stat */}
-            <div className="callout-flex" style={{
-                background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)",
-            }}>
-                <div className="callout-left">
-                    <div style={{ fontSize: 28, fontWeight: 700, color: C.green, fontFamily: "'Barlow Condensed', sans-serif", lineHeight: 1 }}>88%</div>
-                    <div style={{ fontSize: 10, color: C.textDim, marginTop: 3 }}>of re-subscribers</div>
-                </div>
-                <div className="callout-right" style={{ color: C.textMuted }}>
-                    use the app <strong style={{ color: C.text }}>3+ times per week</strong>. Among subscribers who use the app only 1–2×/week, just <strong style={{ color: C.accentLight }}>14%</strong> plan to re-subscribe. Usage frequency is the single strongest predictor of retention.
-                </div>
-            </div>
+            <Callout
+                bgColor="rgba(34,197,94,0.07)"
+                borderColor="rgba(34,197,94,0.2)"
+                leftValue={<div style={{ fontSize: 28, fontWeight: 700, color: C.green, fontFamily: "'Barlow Condensed', sans-serif", lineHeight: 1 }}>88%</div>}
+                leftSub="of re-subscribers"
+            >
+                use the app <strong style={{ color: C.text }}>3+ times per week</strong>. Among subscribers who use the app only 1–2×/week, just <strong style={{ color: C.accentLight }}>14%</strong> plan to re-subscribe. Usage frequency is the single strongest predictor of retention.
+            </Callout>
         </div>
     );
 };
 
-// NEW: Tenure by re-sub group chart
+// Tenure by re-sub group chart
 const TenureChurnChart = () => (
     <div>
         <div style={{ display: "flex", gap: 16, alignItems: "flex-end", justifyContent: "center", marginBottom: 12 }}>
             {DATA.tenureByResub.map(d => (
-                <div key={d.group} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div key={d.group} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", maxWidth: 120 }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: d.color, marginBottom: 6 }}>{d.avgYears} yrs</span>
                     <div style={{
                         width: "70%", height: `${(d.avgYears / 4) * 140}px`,
@@ -298,20 +326,17 @@ const TenureChurnChart = () => (
         </div>
         <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
             {DATA.tenureByResub.map(d => (
-                <div key={d.group} style={{ flex: 1, textAlign: "center", fontSize: 11, color: C.textMuted }}>{d.group}</div>
+                <div key={d.group} style={{ flex: 1, textAlign: "center", fontSize: 11, color: C.textMuted, maxWidth: 120 }}>{d.group}</div>
             ))}
         </div>
-        <div className="callout-flex" style={{
-            background: "rgba(232,53,79,0.07)", border: "1px solid rgba(232,53,79,0.2)",
-        }}>
-            <div className="callout-left">
-                <div style={{ fontSize: 24, fontWeight: 700, color: C.accentLight, fontFamily: "'Barlow Condensed', sans-serif", lineHeight: 1 }}>2.2 yr</div>
-                <div style={{ fontSize: 10, color: C.textDim, marginTop: 3 }}>gap</div>
-            </div>
-            <div className="callout-right" style={{ color: C.textMuted }}>
-                Subscribers leaving average just <strong style={{ color: C.accentLight }}>1.5 years of tenure</strong>, vs <strong style={{ color: C.green }}>3.7 years</strong> for re-subscribers. The first 1–2 years are the critical retention window — if subscribers don't find value early, they're gone.
-            </div>
-        </div>
+        <Callout
+            bgColor="rgba(232,53,79,0.07)"
+            borderColor="rgba(232,53,79,0.2)"
+            leftValue={<div style={{ fontSize: 24, fontWeight: 700, color: C.accentLight, fontFamily: "'Barlow Condensed', sans-serif", lineHeight: 1 }}>2.2 yr</div>}
+            leftSub="gap"
+        >
+            Subscribers leaving average just <strong style={{ color: C.accentLight }}>1.5 years of tenure</strong>, vs <strong style={{ color: C.green }}>3.7 years</strong> for re-subscribers. The first 1–2 years are the critical retention window — if subscribers don't find value early, they're gone.
+        </Callout>
     </div>
 );
 
@@ -390,28 +415,12 @@ const INTERVIEW_THEMES = [
         hypothesis: "H1 — Single destination",
         surveyLink: "14% of open-ended survey comments mention blackouts as top complaint",
         quotes: [
-            {
-                person: "Nick Sun",
-                text: "Blackout can be very annoying. Raptors vs New York — Prime broadcast, Peacock or TV. Playing the Knicks or Nets, random game not nationally televised, it's not watchable.",
-                context: "Describes needing multiple services to watch a single team's games",
-            },
-            {
-                person: "Nick Sun",
-                text: "The Knicks have their own app and the Nets have their own app. $20 to buy a single game. Awful experience. $25 a month for Gotham Sports just for Knicks but $42 for Knicks and Nets.",
-                context: "Real dollar cost of blackout workarounds — paying $42/mo on top of LP subscription",
-            },
-            {
-                person: "Arvind",
-                text: "Blackouts were the most annoying thing. I was in Mountain View, in the Bay Area, so I could watch the Warriors. But the blackout rules were so random.",
-                context: "Even in-market fans find blackout logic confusing and arbitrary",
-            },
-            {
-                person: "Juan",
-                text: "It depends on how good the Heat are next year.",
-                context: "Re-subscription tied entirely to team performance, not product value — blackouts for out-of-market fans compound this",
-            },
+            { person: "Nick Sun", text: "Blackout can be very annoying. Raptors vs New York — Prime broadcast, Peacock or TV. Playing the Knicks or Nets, random game not nationally televised, it's not watchable.", context: "Describes needing multiple services to watch a single team's games" },
+            { person: "Nick Sun", text: "The Knicks have their own app and the Nets have their own app. $20 to buy a single game. Awful experience. $25 a month for Gotham Sports just for Knicks but $42 for Knicks and Nets.", context: "Real dollar cost of blackout workarounds" },
+            { person: "Arvind", text: "Blackouts were the most annoying thing. I was in Mountain View, in the Bay Area, so I could watch the Warriors. But the blackout rules were so random.", context: "Even in-market fans find blackout logic confusing" },
+            { person: "Juan", text: "It depends on how good the Heat are next year.", context: "Re-subscription tied to team performance, not product value" },
         ],
-        insight: "Blackouts don't just frustrate users — they force subscribers to pay for additional services (Gotham Sports, FanDuel Sports Ohio from survey, Prime) to watch the team they're already paying to follow. This fragments the experience and directly undermines the value proposition of League Pass.",
+        insight: "Blackouts don't just frustrate users — they force subscribers to pay for additional services to watch the team they're already paying to follow. This fragments the experience and directly undermines the value proposition of League Pass.",
     },
     {
         id: "illegal",
@@ -421,33 +430,13 @@ const INTERVIEW_THEMES = [
         hypothesis: "H3 — Value perception",
         surveyLink: "NOT captured in survey data — interviews surfaced this exclusively",
         quotes: [
-            {
-                person: "Nick Sun",
-                text: "It's pretty easy to illegally stream an NBA game.",
-                context: "Stated matter-of-factly — not as a threat, just reality",
-            },
-            {
-                person: "Nick Sun",
-                text: "You can buy League Pass India, use a VPN and get all the games. Used this years ago.",
-                context: "VPN workaround to bypass blackouts at a fraction of the price",
-            },
-            {
-                person: "Arvind",
-                text: "Merge the league passes with WNBA. It's available on the illegal streaming sites, it's so easy.",
-                context: "Illegal streams offer more access (no blackouts, WNBA included) than the paid product",
-            },
-            {
-                person: "Nick Sun",
-                text: "When you do illegal streams that have live comments, the comments get pretty crazy/racist.",
-                context: "Even illegal streams have social features (live chat) that LP lacks — but content moderation is terrible",
-            },
-            {
-                person: "Michael Evans",
-                text: "Yes [illegal streams are a negative experience], but it’s free. Plus ad block helps.",
-                context: "Tolerates poor UX of illegal streams because the price (free) outweighs the friction.",
-            },
+            { person: "Nick Sun", text: "It's pretty easy to illegally stream an NBA game.", context: "Stated matter-of-factly — just reality" },
+            { person: "Nick Sun", text: "You can buy League Pass India, use a VPN and get all the games. Used this years ago.", context: "VPN workaround at a fraction of the price" },
+            { person: "Arvind", text: "Merge the league passes with WNBA. It's available on the illegal streaming sites, it's so easy.", context: "Illegal streams offer more access than the paid product" },
+            { person: "Nick Sun", text: "When you do illegal streams that have live comments, the comments get pretty crazy/racist.", context: "Even illegal streams have social features LP lacks" },
+            { person: "Michael Evans", text: "Yes [illegal streams are a negative experience], but it's free. Plus ad block helps.", context: "Tolerates poor UX because price is free" },
         ],
-        insight: "Illegal streams are a serious competitive threat that the survey completely missed. They offer zero blackouts, social features (live comments), and no cost. League Pass needs to offer something illegal streams can't — quality, reliability, exclusive content, and community that's actually moderated.",
+        insight: "Illegal streams are a serious competitive threat the survey missed. They offer zero blackouts, social features, and no cost. League Pass needs to offer something illegal streams can't.",
     },
     {
         id: "ui",
@@ -457,28 +446,12 @@ const INTERVIEW_THEMES = [
         hypothesis: "H2 — Beyond passive consumption",
         surveyLink: "9% of survey comments mention UI/UX issues — interviews reveal specific pain points",
         quotes: [
-            {
-                person: "Nick Sun",
-                text: "The UI for Prime is pretty bad, it doesn't let you skip. Very buggy. A lot of other streaming apps have a Go To Live. It exits the screen. It's really hard to switch to Live mode.",
-                context: "Time-shifted viewing (starting 30 min late) is a key use case but UI actively breaks it",
-            },
-            {
-                person: "Nick Sun",
-                text: "ESPN has better UI for the stats especially on your phone. Hard to find, doesn't load well.",
-                context: "Direct comparison — ESPN wins on mobile stats experience",
-            },
-            {
-                person: "Nick Sun",
-                text: "Every website is so bloated. Click 5 things to go to the game you want. Glitchy. The most important stat is the points a player scored and it gets moved lower or to the right.",
-                context: "Information architecture failure — core data isn't prioritized",
-            },
-            {
-                person: "Arvind",
-                text: "There's a gap between experiencing Netflix versus League Pass. Literally look at Twitch — instant reload, going back and forth, interactiveness, comments. Monetization opportunity.",
-                context: "Benchmarking against best-in-class streaming (Netflix for quality, Twitch for interactivity)",
-            },
+            { person: "Nick Sun", text: "The UI for Prime is pretty bad, it doesn't let you skip. Very buggy. A lot of other streaming apps have a Go To Live. It exits the screen.", context: "Time-shifted viewing is a key use case but UI breaks it" },
+            { person: "Nick Sun", text: "ESPN has better UI for the stats especially on your phone. Hard to find, doesn't load well.", context: "ESPN wins on mobile stats experience" },
+            { person: "Nick Sun", text: "Every website is so bloated. Click 5 things to go to the game you want. Glitchy.", context: "Information architecture failure" },
+            { person: "Arvind", text: "There's a gap between experiencing Netflix versus League Pass. Literally look at Twitch — instant reload, going back and forth, interactiveness, comments.", context: "Benchmarking against Netflix and Twitch" },
         ],
-        insight: "Users benchmark League Pass against Netflix (quality/reliability) and Twitch (interactivity/speed). The current experience falls short on both dimensions. Time-shifted viewing is a key use case that the UI actively sabotages.",
+        insight: "Users benchmark League Pass against Netflix (quality) and Twitch (interactivity). The current experience falls short on both. Time-shifted viewing is a key use case the UI actively sabotages.",
     },
     {
         id: "social",
@@ -488,33 +461,13 @@ const INTERVIEW_THEMES = [
         hypothesis: "H2 — Beyond passive consumption",
         surveyLink: "Survey shows 72% use social media for NBA content — interviews explain why",
         quotes: [
-            {
-                person: "Arvind",
-                text: "They could bring in the Reddit experience. Comment sections are always fun. Makes for good content and people can engage. Reddit has moderators; the comments are 'intellectual' not just garbage.",
-                context: "Explicitly requests Reddit-style moderated community inside the app",
-            },
-            {
-                person: "Arvind",
-                text: "r/NBA is good to keep fans engaged beyond the season.",
-                context: "Community keeps fans engaged year-round — something LP doesn't do",
-            },
-            {
-                person: "Arvind",
-                text: "The younger gen are obsessed with these streamers and content creators — get NBA players to come on their stream, do cool videos. Jesser on YouTube.",
-                context: "Creator content as engagement driver for younger fans",
-            },
-            {
-                person: "Nick Sun",
-                text: "When you do illegal streams that have live comments, the comments get pretty crazy/racist.",
-                context: "Users want social features but need moderation — an opportunity for LP to do it right",
-            },
-            {
-                person: "Michael Evans",
-                text: "r/nba has all the content you need besides live games for free. Plus the comments can be funny/as engaging as actually watching the game. And I think a lot of the interesting parts of the NBA happen outside of the games anyway.",
-                context: "Finds the community and meta-narrative on Reddit more engaging and accessible than the games themselves.",
-            },
+            { person: "Arvind", text: "They could bring in the Reddit experience. Comment sections are always fun. Makes for good content and people can engage.", context: "Explicitly requests Reddit-style community inside the app" },
+            { person: "Arvind", text: "r/NBA is good to keep fans engaged beyond the season.", context: "Community keeps fans engaged year-round" },
+            { person: "Arvind", text: "The younger gen are obsessed with these streamers and content creators — get NBA players to come on their stream.", context: "Creator content as engagement driver" },
+            { person: "Nick Sun", text: "When you do illegal streams that have live comments, the comments get pretty crazy/racist.", context: "Users want social but need moderation" },
+            { person: "Michael Evans", text: "r/nba has all the content you need besides live games for free. Plus the comments can be funny/as engaging as actually watching the game.", context: "Finds community more engaging than the games themselves" },
         ],
-        insight: "Fans already have rich community engagement around basketball — it just happens on Reddit, Twitter, and YouTube instead of League Pass. Arvind explicitly asks for this. The opportunity is to bring moderated social engagement into the LP experience to increase daily stickiness and off-season retention.",
+        insight: "Fans already have rich community engagement — it just happens on Reddit, Twitter, and YouTube instead of League Pass. The opportunity is to bring moderated social engagement into LP to increase daily stickiness.",
     },
     {
         id: "discovery",
@@ -524,28 +477,12 @@ const INTERVIEW_THEMES = [
         hypothesis: "H2 — Beyond passive consumption",
         surveyLink: "Survey: only 34% use Stats, 37% use Replays despite availability",
         quotes: [
-            {
-                person: "Nick Sun",
-                text: "[Do you know about the daily quiz or other features?] No. Don't play Fantasy.",
-                context: "3-year Premium subscriber unaware of engagement features",
-            },
-            {
-                person: "Nick Sun",
-                text: "Stats and watching are the core values. They should give me some kind of schedule. There would be some nice integrated way.",
-                context: "Wants deeper stats integration but doesn't know LP offers stats features",
-            },
-            {
-                person: "Nick Sun",
-                text: "Like NO ADs and stadium feed — that's why I pay for Premium. It plugs into the Jumbotron for breaks instead of ads.",
-                context: "Discovered Premium value accidentally — stadium feed is beloved but not marketed",
-            },
-            {
-                person: "Arvind",
-                text: "When I used to play fantasy I would check stats on the app. Some of my friends still play fantasy but less so now. ESPN fantasy app and NBA app. Fantasy not on NBA app.",
-                context: "Fantasy drove app engagement but LP doesn't integrate it — ESPN does",
-            },
+            { person: "Nick Sun", text: "[Do you know about the daily quiz or other features?] No. Don't play Fantasy.", context: "3-year Premium subscriber unaware of engagement features" },
+            { person: "Nick Sun", text: "Stats and watching are the core values. They should give me some kind of schedule.", context: "Wants deeper stats integration but doesn't know LP offers it" },
+            { person: "Nick Sun", text: "Like NO ADs and stadium feed — that's why I pay for Premium. It plugs into the Jumbotron for breaks.", context: "Discovered Premium value accidentally" },
+            { person: "Arvind", text: "When I used to play fantasy I would check stats on the app. ESPN fantasy app and NBA app. Fantasy not on NBA app.", context: "Fantasy drove engagement but LP doesn't integrate it" },
         ],
-        insight: "A 3-year Premium subscriber doesn't know about the daily quiz. A former subscriber used ESPN for fantasy stats because LP doesn't integrate it. Features exist but aren't surfaced. The stadium feed (Jumbotron during breaks) is a Premium differentiator that nobody markets. This is a discovery and onboarding failure, not a feature gap.",
+        insight: "A 3-year Premium subscriber doesn't know about the daily quiz. Features exist but aren't surfaced. This is a discovery and onboarding failure, not a feature gap.",
     },
     {
         id: "resub",
@@ -555,98 +492,71 @@ const INTERVIEW_THEMES = [
         hypothesis: "H3 — Value perception",
         surveyLink: "Survey: 61% are undecided or leaving — interviews reveal the 'why'",
         quotes: [
-            {
-                person: "Juan",
-                text: "It depends on how good the Heat are next year.",
-                context: "Re-sub decision driven entirely by team performance, not product satisfaction",
-            },
-            {
-                person: "Arvind",
-                text: "If someone else in the household watched basketball I would get league pass.",
-                context: "Subscription needs a social/household justification — solo value isn't enough",
-            },
-            {
-                person: "Nick Sun",
-                text: "We wouldn't get a league pass if we were Knicks fans.",
-                context: "Local market fans don't need LP — it only works for out-of-market fans, limiting the addressable market",
-            },
-            {
-                person: "Nick Sun",
-                text: "Overall it's a good product when you want it to work. 3 years. Best last year on YouTube TV.",
-                context: "Even a loyal subscriber frames value conditionally — 'when you want it to work'",
-            },
-            {
-                person: "Michael Evans",
-                text: "I consider myself a huge nba fan... However, I don’t feel like I need to watch every game (only the biggest) so league pass doesn’t seem worth it to me... [Would subscribe] If it was cheaper.",
-                context: "The all-you-can-eat model doesn't fit his needs; the price is too high for the volume he wants.",
-            },
+            { person: "Juan", text: "It depends on how good the Heat are next year.", context: "Driven by team performance, not product satisfaction" },
+            { person: "Arvind", text: "If someone else in the household watched basketball I would get league pass.", context: "Needs social/household justification" },
+            { person: "Nick Sun", text: "We wouldn't get a league pass if we were Knicks fans.", context: "Only works for out-of-market fans" },
+            { person: "Nick Sun", text: "Overall it's a good product when you want it to work. 3 years. Best last year on YouTube TV.", context: "Value framed conditionally" },
+            { person: "Michael Evans", text: "I consider myself a huge nba fan... However, I don't feel like I need to watch every game so league pass doesn't seem worth it to me... If it was cheaper.", context: "All-you-can-eat model doesn't fit; price too high" },
         ],
-        insight: "Re-subscription decisions are driven by team performance and household dynamics, not product loyalty. This means LP can't control its churn drivers unless it builds value that transcends any single team's season — year-round engagement, community, and content that keeps fans connected even when their team is losing.",
+        insight: "Re-subscription decisions are driven by team performance and household dynamics, not product loyalty. LP must build value that transcends any single team's season.",
     },
 ];
 
 export default function NBADashboard() {
     const [tab, setTab] = useState("overview");
+    const bp = useBreakpoint();
+    const m = bp.isMobile;
+    const pad = m ? "0 16px 24px" : "0 32px 40px";
+    const cardPad = m ? 16 : 24;
 
     return (
         <div style={{
             background: C.bg, color: C.text, minHeight: "100vh",
             fontFamily: "'DM Sans', sans-serif", padding: 0,
+            overflowX: "hidden", width: "100%", boxSizing: "border-box",
         }}>
             <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-            <style>{`
-                .responsive-container { padding: 0 32px 40px; max-width: 960px; margin: 0 auto; }
-                .responsive-header { padding: 28px 32px 20px; }
-                .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-                .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
-                .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-                .grid-2-sm { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
-                .grid-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-                .callout-flex { display: flex; gap: 12px; margin-top: 20px; padding: 14px 16px; border-radius: 8px; align-items: center; }
-                .callout-left { text-align: center; min-width: 70px; }
-                .callout-right { font-size: 12px; line-height: 1.6; border-left: 1px solid ${C.border}; padding-left: 12px; }
-                @media (max-width: 768px) {
-                    .responsive-container { padding: 0 16px 24px; }
-                    .responsive-header { padding: 20px 16px 16px; }
-                    .header-title { font-size: 22px !important; }
-                    .grid-compare { grid-template-columns: 1fr; }
-                    .callout-flex { flex-direction: column; align-items: center; text-align: center; }
-                    .callout-right { border-left: none; border-top: 1px solid ${C.border}; padding-left: 0; padding-top: 12px; margin-top: 8px; }
-                }
-            `}</style>
 
             {/* Header */}
-            <div className="responsive-header" style={{
+            <div style={{
+                padding: m ? "20px 16px 16px" : "28px 32px 20px",
                 background: "linear-gradient(135deg, #0b1221 0%, #1a0a0f 50%, #0b1221 100%)",
                 borderBottom: `1px solid ${C.border}`,
             }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
-                    <span style={{ fontSize: 28 }}>🏀</span>
-                    <div>
-                        <h1 className="header-title" style={{
-                            margin: 0, fontSize: 26, fontWeight: 700, letterSpacing: 2,
+                    <span style={{ fontSize: m ? 22 : 28 }}>🏀</span>
+                    <div style={{ minWidth: 0 }}>
+                        <h1 style={{
+                            margin: 0, fontSize: m ? 18 : 26, fontWeight: 700, letterSpacing: 2,
                             fontFamily: "'Barlow Condensed', sans-serif", textTransform: "uppercase",
                             background: "linear-gradient(90deg, #fff, #e8354f)",
                             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                            lineHeight: 1.2,
                         }}>
                             NBA League Pass — Survey Analysis
                         </h1>
-                        <div style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>
+                        <div style={{ fontSize: m ? 10 : 12, color: C.textDim, marginTop: 4 }}>
                             Market Requirements Document · 134 Respondents · Feb 2026 · Group 3
                         </div>
                     </div>
                 </div>
 
-                {/* Tabs */}
-                <div style={{ display: "flex", gap: 4, marginTop: 20, overflowX: "auto" }}>
+                {/* Tabs — scrollable on mobile */}
+                <div style={{
+                    display: "flex", gap: 4, marginTop: 20, overflowX: "auto",
+                    WebkitOverflowScrolling: "touch",
+                    scrollbarWidth: "none", msOverflowStyle: "none",
+                    paddingBottom: 4,
+                }}>
                     {TABS.map(t => (
                         <button key={t.id} onClick={() => setTab(t.id)} style={{
                             background: tab === t.id ? C.accent : "transparent",
                             color: tab === t.id ? "#fff" : C.textMuted,
                             border: `1px solid ${tab === t.id ? C.accent : C.border}`,
-                            borderRadius: 6, padding: "8px 16px", fontSize: 12, fontWeight: 600,
+                            borderRadius: 6, padding: m ? "7px 12px" : "8px 16px",
+                            fontSize: m ? 11 : 12, fontWeight: 600,
                             cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s",
-                            fontFamily: "'DM Sans', sans-serif",
+                            fontFamily: "'DM Sans', sans-serif", flexShrink: 0,
                         }}>
                             {t.label}
                         </button>
@@ -654,23 +564,30 @@ export default function NBADashboard() {
                 </div>
             </div>
 
-            <div className="responsive-container">
+            <div style={{ padding: pad, maxWidth: 960, margin: "0 auto" }}>
 
                 {/* ═══ OVERVIEW TAB ═══ */}
                 {tab === "overview" && (
                     <div>
                         <SectionTitle number="1">Sample Overview</SectionTitle>
-
-                        <div className="grid-4">
-                            <StatCard label="Respondents" value="134" accent />
-                            <StatCard label="Standard Tier" value="69%" sub="93 of 134" />
-                            <StatCard label="At-Risk" value="61%" sub="No or Thinking" accent />
-                            <StatCard label="Avg Tenure" value="2.3 yr" sub="Median: 2 yrs" />
+                        <div style={{
+                            display: "grid",
+                            gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)",
+                            gap: 12,
+                        }}>
+                            <StatCard label="Respondents" value="134" accent isMobile={m} />
+                            <StatCard label="Standard Tier" value="69%" sub="93 of 134" isMobile={m} />
+                            <StatCard label="At-Risk" value="61%" sub="No or Thinking" accent isMobile={m} />
+                            <StatCard label="Avg Tenure" value="2.3 yr" sub="Median: 2 yrs" isMobile={m} />
                         </div>
 
                         <SectionTitle number="2">Demographics</SectionTitle>
-                        <div className="grid-2">
-                            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
+                        <div style={{
+                            display: "grid",
+                            gridTemplateColumns: m ? "1fr" : "1fr 1fr",
+                            gap: m ? 12 : 20,
+                        }}>
+                            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                                 <h3 style={{ fontSize: 13, color: C.textMuted, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: 1 }}>Gender</h3>
                                 {DATA.demographics.gender.map(d => (
                                     <div key={d.label} style={{ marginBottom: 12 }}>
@@ -682,8 +599,7 @@ export default function NBADashboard() {
                                     </div>
                                 ))}
                             </div>
-
-                            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
+                            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                                 <h3 style={{ fontSize: 13, color: C.textMuted, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: 1 }}>Age Distribution</h3>
                                 {DATA.demographics.age.map(d => (
                                     <div key={d.label} style={{ marginBottom: 12 }}>
@@ -698,7 +614,7 @@ export default function NBADashboard() {
                         </div>
 
                         <SectionTitle number="3">Tier Distribution</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                             {DATA.tiers.map(d => (
                                 <div key={d.label} style={{ marginBottom: 14 }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
@@ -714,11 +630,11 @@ export default function NBADashboard() {
                         </div>
 
                         <SectionTitle number="4">Subscriber Tenure</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
-                            <div style={{ display: "flex", gap: 8, alignItems: "flex-end", height: 140, marginBottom: 8 }}>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
+                            <div style={{ display: "flex", gap: m ? 4 : 8, alignItems: "flex-end", height: 140, marginBottom: 8 }}>
                                 {DATA.years.map(d => (
-                                    <div key={d.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                        <span style={{ fontSize: 11, color: C.textMuted, marginBottom: 4 }}>{d.pct}%</span>
+                                    <div key={d.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
+                                        <span style={{ fontSize: m ? 9 : 11, color: C.textMuted, marginBottom: 4 }}>{d.pct}%</span>
                                         <div style={{
                                             width: "100%", maxWidth: 60, height: `${(d.pct / 35) * 120}px`,
                                             background: `linear-gradient(180deg, ${C.blueLight}, ${C.blue})`,
@@ -727,9 +643,9 @@ export default function NBADashboard() {
                                     </div>
                                 ))}
                             </div>
-                            <div style={{ display: "flex", gap: 8 }}>
+                            <div style={{ display: "flex", gap: m ? 4 : 8 }}>
                                 {DATA.years.map(d => (
-                                    <div key={d.label} style={{ flex: 1, textAlign: "center", fontSize: 10, color: C.textDim }}>{d.label}</div>
+                                    <div key={d.label} style={{ flex: 1, textAlign: "center", fontSize: m ? 8 : 10, color: C.textDim }}>{d.label}</div>
                                 ))}
                             </div>
                             <Insight>
@@ -738,13 +654,13 @@ export default function NBADashboard() {
                         </div>
 
                         <SectionTitle number="5">Tenure vs. Churn — The Critical Retention Window</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                             <p style={{ fontSize: 13, color: C.textMuted, margin: "0 0 20px", lineHeight: 1.6 }}>
                                 Average subscriber tenure broken down by re-subscription intent reveals a stark pattern:
                             </p>
                             <TenureChurnChart />
                             <Insight>
-                                Newer subscribers churn fastest. Those planning to leave average just 1.5 years of tenure, vs 3.7 years for confirmed re-subscribers. The first 1–2 years are the critical retention window — winning subscribers early and building habit during that period is the highest-leverage retention investment.
+                                Newer subscribers churn fastest. Those planning to leave average just 1.5 years of tenure, vs 3.7 years for confirmed re-subscribers. The first 1–2 years are the critical retention window.
                             </Insight>
                         </div>
                     </div>
@@ -754,13 +670,17 @@ export default function NBADashboard() {
                 {tab === "segments" && (
                     <div>
                         <SectionTitle number="1">Re-subscription Intent (Overall)</SectionTitle>
-                        <div className="grid-4">
+                        <div style={{
+                            display: "grid",
+                            gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)",
+                            gap: 12,
+                        }}>
                             {DATA.resubscribe.overall.map(d => (
                                 <div key={d.label} style={{
                                     background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
-                                    padding: 20, textAlign: "center", borderTop: `3px solid ${d.color}`,
+                                    padding: m ? 14 : 20, textAlign: "center", borderTop: `3px solid ${d.color}`,
                                 }}>
-                                    <div style={{ fontSize: 36, fontWeight: 700, color: d.color, fontFamily: "'Barlow Condensed', sans-serif" }}>
+                                    <div style={{ fontSize: m ? 28 : 36, fontWeight: 700, color: d.color, fontFamily: "'Barlow Condensed', sans-serif" }}>
                                         {d.pct}%
                                     </div>
                                     <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>{d.label}</div>
@@ -773,40 +693,34 @@ export default function NBADashboard() {
                         </Insight>
 
                         <SectionTitle number="2">Re-subscription by Tier</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                             <ResubByTierChart />
                             <Insight>
-                                Premium subscribers are nearly 2× more likely to re-subscribe (62%) vs Standard (32%). This validates Hypothesis 3: Standard subscribers don't see enough value to stay or upgrade. The "still thinking" cohort (42% of Standard) is the swing group — converting even half would significantly improve retention.
+                                Premium subscribers are nearly 2× more likely to re-subscribe (62%) vs Standard (32%). The "still thinking" cohort (42% of Standard) is the swing group — converting even half would significantly improve retention.
                             </Insight>
                         </div>
 
                         <SectionTitle number="3">Price Sensitivity Among the Undecided</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
-                            <div className="grid-3" style={{ marginBottom: 20 }}>
-                                <div style={{
-                                    background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.2)",
-                                    borderRadius: 8, padding: 16, textAlign: "center",
-                                }}>
-                                    <div style={{ fontSize: 32, fontWeight: 700, color: C.gold, fontFamily: "'Barlow Condensed', sans-serif" }}>14%</div>
-                                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>of open-ended comments</div>
-                                    <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>mention pricing as top concern</div>
-                                </div>
-                                <div style={{
-                                    background: "rgba(232,53,79,0.08)", border: "1px solid rgba(232,53,79,0.2)",
-                                    borderRadius: 8, padding: 16, textAlign: "center",
-                                }}>
-                                    <div style={{ fontSize: 32, fontWeight: 700, color: C.accentLight, fontFamily: "'Barlow Condensed', sans-serif" }}>42%</div>
-                                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>of Standard are "still thinking"</div>
-                                    <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>with price as the swing factor</div>
-                                </div>
-                                <div style={{
-                                    background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)",
-                                    borderRadius: 8, padding: 16, textAlign: "center",
-                                }}>
-                                    <div style={{ fontSize: 32, fontWeight: 700, color: C.blueLight, fontFamily: "'Barlow Condensed', sans-serif" }}>62%</div>
-                                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>Premium re-sub rate</div>
-                                    <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>same price concern, less churn</div>
-                                </div>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: m ? "1fr" : "repeat(3, 1fr)",
+                                gap: 12, marginBottom: 20,
+                            }}>
+                                {[
+                                    { val: "14%", sub: "of open-ended comments", sub2: "mention pricing as top concern", bg: "rgba(251,191,36,0.08)", border: "rgba(251,191,36,0.2)", color: C.gold },
+                                    { val: "42%", sub: "of Standard are \"still thinking\"", sub2: "with price as the swing factor", bg: "rgba(232,53,79,0.08)", border: "rgba(232,53,79,0.2)", color: C.accentLight },
+                                    { val: "62%", sub: "Premium re-sub rate", sub2: "same price concern, less churn", bg: "rgba(59,130,246,0.08)", border: "rgba(59,130,246,0.2)", color: C.blueLight },
+                                ].map((item, i) => (
+                                    <div key={i} style={{
+                                        background: item.bg, border: `1px solid ${item.border}`,
+                                        borderRadius: 8, padding: 16, textAlign: "center",
+                                    }}>
+                                        <div style={{ fontSize: 32, fontWeight: 700, color: item.color, fontFamily: "'Barlow Condensed', sans-serif" }}>{item.val}</div>
+                                        <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>{item.sub}</div>
+                                        <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>{item.sub2}</div>
+                                    </div>
+                                ))}
                             </div>
 
                             <div style={{ fontSize: 13, color: C.textMuted, marginBottom: 14, lineHeight: 1.6 }}>
@@ -828,45 +742,32 @@ export default function NBADashboard() {
                             ))}
 
                             <Insight>
-                                Price sensitivity is high among the undecided — but the real issue is <em>perceived value</em>, not absolute price. Premium subscribers pay more and churn less (62% vs 32%), suggesting the Standard tier's value proposition isn't landing. The answer isn't necessarily a discount; it's making Standard subscribers feel they're getting Premium-level value for their money.
+                                Price sensitivity is high among the undecided — but the real issue is <em>perceived value</em>, not absolute price. Premium subscribers pay more and churn less (62% vs 32%), suggesting the Standard tier's value proposition isn't landing.
                             </Insight>
                         </div>
 
                         <SectionTitle number="4">Churn Risk Matrix</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
-                            <div className="grid-2-sm">
-                                <div style={{
-                                    background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)",
-                                    borderRadius: 8, padding: 16,
-                                }}>
-                                    <div style={{ fontSize: 13, fontWeight: 700, color: C.green, marginBottom: 8 }}>✅ Low Risk — Premium "Yes"</div>
-                                    <div style={{ fontSize: 24, fontWeight: 700, color: C.green, fontFamily: "'Barlow Condensed', sans-serif" }}>15 subscribers</div>
-                                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>Loyal, high-value. 62% retention rate. These are your superfans.</div>
-                                </div>
-                                <div style={{
-                                    background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.2)",
-                                    borderRadius: 8, padding: 16,
-                                }}>
-                                    <div style={{ fontSize: 13, fontWeight: 700, color: C.gold, marginBottom: 8 }}>⚠️ Medium Risk — Standard "Thinking"</div>
-                                    <div style={{ fontSize: 24, fontWeight: 700, color: C.gold, fontFamily: "'Barlow Condensed', sans-serif" }}>39 subscribers</div>
-                                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>Largest swing group. Represent the biggest retention opportunity. Need a reason to stay.</div>
-                                </div>
-                                <div style={{
-                                    background: "rgba(201,8,42,0.08)", border: "1px solid rgba(201,8,42,0.2)",
-                                    borderRadius: 8, padding: 16,
-                                }}>
-                                    <div style={{ fontSize: 13, fontWeight: 700, color: C.accentLight, marginBottom: 8 }}>🚨 High Risk — Standard "No"</div>
-                                    <div style={{ fontSize: 24, fontWeight: 700, color: C.accentLight, fontFamily: "'Barlow Condensed', sans-serif" }}>22 subscribers</div>
-                                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>Already decided to leave. Price and blackouts are top complaints. Hard to win back.</div>
-                                </div>
-                                <div style={{
-                                    background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)",
-                                    borderRadius: 8, padding: 16,
-                                }}>
-                                    <div style={{ fontSize: 13, fontWeight: 700, color: C.purple, marginBottom: 8 }}>🔄 Upsell Opportunity</div>
-                                    <div style={{ fontSize: 24, fontWeight: 700, color: C.purple, fontFamily: "'Barlow Condensed', sans-serif" }}>30 Standard "Yes"</div>
-                                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>Committed Standard subscribers. Prime candidates for Premium upgrade with the right incentive.</div>
-                                </div>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: m ? "1fr" : "1fr 1fr",
+                                gap: 16,
+                            }}>
+                                {[
+                                    { label: "✅ Low Risk — Premium \"Yes\"", value: "15 subscribers", desc: "Loyal, high-value. 62% retention rate. These are your superfans.", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.2)", color: C.green },
+                                    { label: "⚠️ Medium Risk — Standard \"Thinking\"", value: "39 subscribers", desc: "Largest swing group. Represent the biggest retention opportunity.", bg: "rgba(251,191,36,0.08)", border: "rgba(251,191,36,0.2)", color: C.gold },
+                                    { label: "🚨 High Risk — Standard \"No\"", value: "22 subscribers", desc: "Already decided to leave. Price and blackouts are top complaints.", bg: "rgba(201,8,42,0.08)", border: "rgba(201,8,42,0.2)", color: C.accentLight },
+                                    { label: "🔄 Upsell Opportunity", value: "30 Standard \"Yes\"", desc: "Committed Standard subscribers. Prime candidates for Premium upgrade.", bg: "rgba(168,85,247,0.08)", border: "rgba(168,85,247,0.2)", color: C.purple },
+                                ].map((item, i) => (
+                                    <div key={i} style={{
+                                        background: item.bg, border: `1px solid ${item.border}`,
+                                        borderRadius: 8, padding: 16,
+                                    }}>
+                                        <div style={{ fontSize: 13, fontWeight: 700, color: item.color, marginBottom: 8 }}>{item.label}</div>
+                                        <div style={{ fontSize: 24, fontWeight: 700, color: item.color, fontFamily: "'Barlow Condensed', sans-serif" }}>{item.value}</div>
+                                        <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4 }}>{item.desc}</div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -876,12 +777,12 @@ export default function NBADashboard() {
                 {tab === "behavior" && (
                     <div>
                         <SectionTitle number="1">Weekly Usage Frequency</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
-                            <div style={{ display: "flex", gap: 12, alignItems: "flex-end", height: 160, marginBottom: 8 }}>
-                                {DATA.usage.overall.map((d, i) => (
-                                    <div key={d.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                        <span style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 4 }}>{d.pct}%</span>
-                                        <span style={{ fontSize: 11, color: C.textDim, marginBottom: 4 }}>{d.value}</span>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
+                            <div style={{ display: "flex", gap: m ? 8 : 12, alignItems: "flex-end", height: 160, marginBottom: 8 }}>
+                                {DATA.usage.overall.map(d => (
+                                    <div key={d.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
+                                        <span style={{ fontSize: m ? 11 : 13, fontWeight: 700, color: C.text, marginBottom: 4 }}>{d.pct}%</span>
+                                        <span style={{ fontSize: m ? 9 : 11, color: C.textDim, marginBottom: 4 }}>{d.value}</span>
                                         <div style={{
                                             width: "80%", height: `${(d.pct / 40) * 120}px`,
                                             background: `linear-gradient(180deg, ${C.accentLight}, ${C.accent})`,
@@ -890,29 +791,29 @@ export default function NBADashboard() {
                                     </div>
                                 ))}
                             </div>
-                            <div style={{ display: "flex", gap: 12 }}>
+                            <div style={{ display: "flex", gap: m ? 8 : 12 }}>
                                 {DATA.usage.overall.map(d => (
                                     <div key={d.label} style={{ flex: 1, textAlign: "center", fontSize: 12, color: C.textMuted }}>{d.label}×/wk</div>
                                 ))}
                             </div>
                             <Insight>
-                                65% of subscribers use League Pass 3+ times per week — this is an engaged audience. But 36% use it only 0–2 times, suggesting the app isn't sticky enough for daily engagement. This validates Hypothesis 1: League Pass feels like a "game-night-only" utility.
+                                65% of subscribers use League Pass 3+ times per week. But 36% use it only 0–2 times, suggesting the app isn't sticky enough for daily engagement.
                             </Insight>
                         </div>
 
                         <SectionTitle number="2">Usage Frequency as a Retention Predictor</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                             <p style={{ fontSize: 13, color: C.textMuted, margin: "0 0 16px", lineHeight: 1.6 }}>
                                 Re-subscription intent broken down by how often subscribers use the app each week:
                             </p>
                             <UsageRetentionChart />
                             <Insight>
-                                Usage frequency is the single strongest predictor of retention. The jump from 1–2× to 3–4× per week is the critical threshold — it triples the re-subscribe rate (14% → 45%). Any product investment that increases weekly session frequency directly improves retention.
+                                The jump from 1–2× to 3–4× per week is the critical threshold — it triples the re-subscribe rate (14% → 45%). Any product investment that increases weekly session frequency directly improves retention.
                             </Insight>
                         </div>
 
                         <SectionTitle number="3">Features Used</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                             {DATA.features.map(d => (
                                 <div key={d.label} style={{ marginBottom: 16 }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
@@ -923,15 +824,15 @@ export default function NBADashboard() {
                                 </div>
                             ))}
                             <Insight>
-                                Live games completely dominate (96%), while Replays (37%) and Stats (34%) are underutilized. The gap between live game usage and everything else is massive — it confirms that subscribers see League Pass as a live streaming tool only, not a comprehensive NBA platform. This is the core of Hypothesis 2: users want more than passive consumption but don't discover or value the other features.
+                                Live games completely dominate (96%), while Replays (37%) and Stats (34%) are underutilized. Subscribers see League Pass as a live streaming tool only, not a comprehensive NBA platform.
                             </Insight>
                         </div>
 
                         <SectionTitle number="4">Platform Fragmentation</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                             {DATA.platforms.map(d => (
                                 <div key={d.label} style={{ marginBottom: 16 }}>
-                                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6, flexWrap: "wrap", gap: 4 }}>
                                         <span style={{ fontWeight: 600 }}>{d.label}</span>
                                         <span style={{ color: C.textDim }}>{d.count} ({d.pct}%)</span>
                                     </div>
@@ -939,24 +840,28 @@ export default function NBADashboard() {
                                 </div>
                             ))}
                             <Insight>
-                                72% of League Pass subscribers also use social media for NBA content, and 65% use sports news apps. This validates Hypothesis 1: fans are juggling multiple platforms because League Pass doesn't serve as a single destination. The average subscriber uses 2.9 other platform categories beyond League Pass.
+                                72% of League Pass subscribers also use social media for NBA content. The average subscriber uses 2.9 other platform categories beyond League Pass.
                             </Insight>
                         </div>
 
                         <SectionTitle number="5">Access Method</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
-                            <div className="grid-4">
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)",
+                                gap: 16,
+                            }}>
                                 {DATA.access.map(d => (
                                     <div key={d.label} style={{ textAlign: "center" }}>
                                         <div style={{
-                                            width: 80, height: 80, borderRadius: "50%", margin: "0 auto 8px",
+                                            width: m ? 64 : 80, height: m ? 64 : 80, borderRadius: "50%", margin: "0 auto 8px",
                                             background: `conic-gradient(${C.blueLight} 0% ${d.pct}%, ${C.border} ${d.pct}% 100%)`,
                                             display: "flex", alignItems: "center", justifyContent: "center",
                                         }}>
                                             <div style={{
-                                                width: 60, height: 60, borderRadius: "50%", background: C.card,
+                                                width: m ? 48 : 60, height: m ? 48 : 60, borderRadius: "50%", background: C.card,
                                                 display: "flex", alignItems: "center", justifyContent: "center",
-                                                fontSize: 16, fontWeight: 700, fontFamily: "'Barlow Condensed', sans-serif",
+                                                fontSize: m ? 14 : 16, fontWeight: 700, fontFamily: "'Barlow Condensed', sans-serif",
                                             }}>{d.pct}%</div>
                                         </div>
                                         <div style={{ fontSize: 12, color: C.textMuted }}>{d.label}</div>
@@ -964,7 +869,7 @@ export default function NBADashboard() {
                                 ))}
                             </div>
                             <Insight>
-                                43% use both app and website, suggesting cross-device behavior. 9% access through Amazon — relatively low given the new partnership, supporting the PM's note that Amazon is underperforming expectations.
+                                43% use both app and website. 9% access through Amazon — relatively low given the new partnership.
                             </Insight>
                         </div>
                     </div>
@@ -977,11 +882,10 @@ export default function NBADashboard() {
                         <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 20 }}>
                             58 of 134 respondents (43%) left substantive comments. We categorized them into themes:
                         </p>
-
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                             {DATA.commentThemes.map((d, i) => (
                                 <div key={d.theme} style={{ marginBottom: 16 }}>
-                                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6, flexWrap: "wrap", gap: 4 }}>
                                         <span style={{ fontWeight: 600 }}>{d.theme}</span>
                                         <span style={{ color: C.textDim }}>{d.count} mentions ({d.pct}%)</span>
                                     </div>
@@ -991,11 +895,9 @@ export default function NBADashboard() {
                         </div>
 
                         <SectionTitle number="2">Representative Quotes by Theme</SectionTitle>
-
                         {[
                             {
-                                theme: "🚫 Blackouts",
-                                color: C.accent,
+                                theme: "🚫 Blackouts", color: C.accent,
                                 quotes: [
                                     { tier: "Premium", quote: "I wish there was no blackout when I use league pass" },
                                     { tier: "Standard", quote: "The removal of local team blackouts. It shouldn't be easier to watch other teams outside my area than the actual local team I support." },
@@ -1004,8 +906,7 @@ export default function NBADashboard() {
                                 ],
                             },
                             {
-                                theme: "💰 Pricing",
-                                color: C.gold,
+                                theme: "💰 Pricing", color: C.gold,
                                 quotes: [
                                     { tier: "Standard", quote: "I just would like to see the price dropped" },
                                     { tier: "Standard", quote: "For new and long-term members, a discount code to renew League Pass. Also, a discount on team merch." },
@@ -1013,8 +914,7 @@ export default function NBADashboard() {
                                 ],
                             },
                             {
-                                theme: "🖥️ UI / UX & Quality",
-                                color: C.blueLight,
+                                theme: "🖥️ UI / UX & Quality", color: C.blueLight,
                                 quotes: [
                                     { tier: "Standard", quote: "Better and faster user interface which is less buggy" },
                                     { tier: "Standard", quote: "A better UI/UX" },
@@ -1023,8 +923,7 @@ export default function NBADashboard() {
                                 ],
                             },
                             {
-                                theme: "📺 More Content / Games",
-                                color: C.green,
+                                theme: "📺 More Content / Games", color: C.green,
                                 quotes: [
                                     { tier: "Standard", quote: "All games available" },
                                     { tier: "Standard", quote: "Classic games" },
@@ -1035,7 +934,7 @@ export default function NBADashboard() {
                         ].map(section => (
                             <div key={section.theme} style={{
                                 background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
-                                padding: 20, marginBottom: 16, borderLeft: `3px solid ${section.color}`,
+                                padding: cardPad, marginBottom: 16, borderLeft: `3px solid ${section.color}`,
                             }}>
                                 <h3 style={{ fontSize: 14, fontWeight: 700, color: section.color, margin: "0 0 12px" }}>
                                     {section.theme}
@@ -1046,14 +945,14 @@ export default function NBADashboard() {
                                         borderLeft: `2px solid ${C.border}`, lineHeight: 1.5,
                                     }}>
                                         "{q.quote}"
-                                        <span style={{ fontSize: 11, color: C.textDim, marginLeft: 8 }}>— {q.tier} subscriber</span>
+                                        <span style={{ fontSize: 11, color: C.textDim, marginLeft: 8 }}>— {q.tier}</span>
                                     </div>
                                 ))}
                             </div>
                         ))}
 
                         <Insight>
-                            The two most common pain points — blackouts (14%) and pricing (14%) — represent structural issues tied to NBA broadcast deals. UI/UX complaints (9%) and requests for more game access (9%) represent product-level opportunities that League Pass can directly address. The One-team subscriber who paid for a separate service (FanDuel Sports Ohio) just to watch blacked-out home games is a powerful example of broken user experience.
+                            The two most common pain points — blackouts (14%) and pricing (14%) — represent structural issues tied to NBA broadcast deals. UI/UX complaints (9%) and requests for more game access (9%) represent product-level opportunities that League Pass can directly address.
                         </Insight>
                     </div>
                 )}
@@ -1063,18 +962,22 @@ export default function NBADashboard() {
                     <div>
                         <SectionTitle number="1">Interviewee Profiles</SectionTitle>
                         <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 20, lineHeight: 1.6 }}>
-                            4 in-depth interviews conducted with League Pass subscribers / former subscribers / fans. These provide the causal "why" behind the survey's quantitative findings.
+                            4 in-depth interviews conducted with League Pass subscribers / former subscribers / fans.
                         </p>
 
-                        <div className="grid-2-sm">
+                        <div style={{
+                            display: "grid",
+                            gridTemplateColumns: m ? "1fr" : "1fr 1fr",
+                            gap: 16,
+                        }}>
                             {INTERVIEWEES.map(p => (
                                 <div key={p.name} style={{
                                     background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
-                                    padding: 20, borderTop: `3px solid ${p.color}`,
+                                    padding: cardPad, borderTop: `3px solid ${p.color}`,
                                 }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                                         <span style={{ fontSize: 28 }}>{p.emoji}</span>
-                                        <div>
+                                        <div style={{ minWidth: 0 }}>
                                             <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "'Barlow Condensed', sans-serif" }}>{p.name}</div>
                                             <div style={{ fontSize: 11, color: C.textDim }}>{p.team} fan · {p.location}</div>
                                         </div>
@@ -1089,7 +992,7 @@ export default function NBADashboard() {
                                     ].map(([label, val]) => (
                                         <div key={label} style={{ display: "flex", fontSize: 12, marginBottom: 6, lineHeight: 1.4 }}>
                                             <span style={{ color: C.textDim, minWidth: 75, flexShrink: 0 }}>{label}</span>
-                                            <span style={{ color: C.textMuted }}>{val}</span>
+                                            <span style={{ color: C.textMuted, wordBreak: "break-word" }}>{val}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -1098,7 +1001,7 @@ export default function NBADashboard() {
 
                         <SectionTitle number="2">Thematic Analysis — Mapped to Hypotheses</SectionTitle>
                         <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 20, lineHeight: 1.6 }}>
-                            Each theme below synthesizes interview quotes, maps them to your team's hypotheses, and connects to the quantitative survey findings.
+                            Each theme synthesizes interview quotes, maps them to your team's hypotheses, and connects to quantitative findings.
                         </p>
 
                         {INTERVIEW_THEMES.map((t, idx) => (
@@ -1107,14 +1010,15 @@ export default function NBADashboard() {
                                 marginBottom: 20, overflow: "hidden",
                             }}>
                                 <div style={{
-                                    padding: "16px 20px", borderBottom: `1px solid ${C.border}`,
+                                    padding: m ? "12px 16px" : "16px 20px",
+                                    borderBottom: `1px solid ${C.border}`,
                                     background: `linear-gradient(135deg, ${t.color}11, transparent)`,
-                                    display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12,
+                                    display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8,
                                 }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                        <span style={{ fontSize: 22 }}>{t.icon}</span>
-                                        <div>
-                                            <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: 0.5 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                                        <span style={{ fontSize: 22, flexShrink: 0 }}>{t.icon}</span>
+                                        <div style={{ minWidth: 0 }}>
+                                            <div style={{ fontSize: m ? 14 : 16, fontWeight: 700, fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: 0.5 }}>
                                                 {t.theme}
                                             </div>
                                             <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>
@@ -1124,26 +1028,27 @@ export default function NBADashboard() {
                                     </div>
                                     <span style={{
                                         fontSize: 10, fontWeight: 600, padding: "4px 10px", borderRadius: 20,
-                                        background: `${t.color}22`, color: t.color, whiteSpace: "nowrap",
+                                        background: `${t.color}22`, color: t.color, whiteSpace: "nowrap", flexShrink: 0,
                                     }}>
                                         Theme {idx + 1} of {INTERVIEW_THEMES.length}
                                     </span>
                                 </div>
 
                                 <div style={{
-                                    padding: "10px 20px", background: "rgba(59,130,246,0.06)",
+                                    padding: m ? "8px 16px" : "10px 20px",
+                                    background: "rgba(59,130,246,0.06)",
                                     borderBottom: `1px solid ${C.border}`, fontSize: 12, color: C.blueLight,
-                                    display: "flex", alignItems: "center", gap: 8,
+                                    display: "flex", alignItems: "flex-start", gap: 8,
                                 }}>
-                                    <span>📊</span>
-                                    <span>Survey connection: {t.surveyLink}</span>
+                                    <span style={{ flexShrink: 0 }}>📊</span>
+                                    <span style={{ wordBreak: "break-word" }}>Survey connection: {t.surveyLink}</span>
                                 </div>
 
-                                <div style={{ padding: "16px 20px" }}>
+                                <div style={{ padding: m ? "12px 16px" : "16px 20px" }}>
                                     {t.quotes.map((q, qi) => (
                                         <div key={qi} style={{
                                             marginBottom: qi < t.quotes.length - 1 ? 16 : 0,
-                                            padding: "12px 16px",
+                                            padding: m ? "10px 12px" : "12px 16px",
                                             background: qi % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
                                             borderRadius: 8,
                                             borderLeft: `3px solid ${t.color}44`,
@@ -1151,16 +1056,23 @@ export default function NBADashboard() {
                                             <div style={{ fontSize: 13, color: C.text, lineHeight: 1.6, fontStyle: "italic", marginBottom: 6 }}>
                                                 "{q.text}"
                                             </div>
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <div style={{
+                                                display: "flex",
+                                                flexDirection: m ? "column" : "row",
+                                                justifyContent: "space-between",
+                                                alignItems: m ? "flex-start" : "center",
+                                                gap: 4,
+                                            }}>
                                                 <span style={{ fontSize: 11, fontWeight: 600, color: t.color }}>— {q.person}</span>
-                                                <span style={{ fontSize: 11, color: C.textDim, maxWidth: "60%", textAlign: "right" }}>{q.context}</span>
+                                                <span style={{ fontSize: 11, color: C.textDim, textAlign: m ? "left" : "right" }}>{q.context}</span>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
 
                                 <div style={{
-                                    padding: "14px 20px", borderTop: `1px solid ${C.border}`,
+                                    padding: m ? "12px 16px" : "14px 20px",
+                                    borderTop: `1px solid ${C.border}`,
                                     background: `${t.color}08`, fontSize: 13, color: C.textMuted, lineHeight: 1.6,
                                 }}>
                                     <span style={{ color: t.color, fontWeight: 700, marginRight: 6 }}>→ Insight:</span>
@@ -1170,44 +1082,71 @@ export default function NBADashboard() {
                         ))}
 
                         <SectionTitle number="3">Interview vs. Survey — What Interviews Uniquely Revealed</SectionTitle>
-                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
-                            <div className="grid-compare" style={{ fontSize: 13 }}>
-                                <div style={{ padding: "10px 12px", background: C.accent, borderRadius: "8px 0 0 0", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>
-                                    Survey Captured
-                                </div>
-                                <div style={{ padding: "10px 12px", background: C.blue, borderRadius: "0 8px 0 0", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>
-                                    Interviews Uniquely Added
-                                </div>
-                                {[
-                                    ["Blackouts are the #1 complaint (14%)", "Specific $ cost: $20/game, $42/mo for Gotham Sports on top of LP"],
-                                    ["72% use social media for NBA content", "Users want Reddit-style moderated community INSIDE the app"],
-                                    ["Only 34% use Stats features", "ESPN's mobile stats UI is explicitly better; Fantasy isn't integrated"],
-                                    ["9% mention UI/UX issues", "Time-shifted viewing is broken; Prime's skip/rewind is buggy; benchmarked vs Netflix & Twitch"],
-                                    ["61% uncertain about re-subscribing", "Re-sub tied to team performance & household dynamics, not product quality"],
-                                    ["—", "Illegal streaming is a serious, easy competitor with social features LP lacks"],
-                                    ["—", "3-year Premium user didn't know about daily quiz; stadium feed is the hidden gem of Premium"],
-                                    ["—", "VPN workarounds (buying LP India) used to bypass blackouts at a fraction of cost"],
-                                ].map(([survey, interview], i) => (
-                                    <>
-                                        <div key={`s${i}`} style={{
-                                            padding: "10px 12px", borderBottom: `1px solid ${C.border}`,
-                                            color: survey === "—" ? C.textDim : C.textMuted,
-                                            background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad, overflowX: "auto" }}>
+                            {m ? (
+                                /* Mobile: card-style layout instead of table */
+                                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                    {[
+                                        ["Blackouts are the #1 complaint (14%)", "Specific $ cost: $20/game, $42/mo for Gotham Sports on top of LP"],
+                                        ["72% use social media for NBA content", "Users want Reddit-style moderated community INSIDE the app"],
+                                        ["Only 34% use Stats features", "ESPN's mobile stats UI is explicitly better; Fantasy isn't integrated"],
+                                        ["9% mention UI/UX issues", "Time-shifted viewing is broken; Prime's skip/rewind is buggy; benchmarked vs Netflix & Twitch"],
+                                        ["61% uncertain about re-subscribing", "Re-sub tied to team performance & household dynamics, not product quality"],
+                                        ["—", "Illegal streaming is a serious, easy competitor with social features LP lacks"],
+                                        ["—", "3-year Premium user didn't know about daily quiz; stadium feed is the hidden gem of Premium"],
+                                        ["—", "VPN workarounds (buying LP India) used to bypass blackouts at a fraction of cost"],
+                                    ].map(([survey, interview], i) => (
+                                        <div key={i} style={{
+                                            background: "rgba(255,255,255,0.02)", borderRadius: 8, padding: 12,
+                                            border: `1px solid ${C.border}`,
                                         }}>
-                                            {survey}
+                                            <div style={{ fontSize: 10, fontWeight: 700, color: C.accent, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Survey</div>
+                                            <div style={{ fontSize: 12, color: survey === "—" ? C.textDim : C.textMuted, marginBottom: 10 }}>{survey}</div>
+                                            <div style={{ fontSize: 10, fontWeight: 700, color: C.blueLight, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Interview Added</div>
+                                            <div style={{ fontSize: 12, color: C.text, fontWeight: survey === "—" ? 600 : 400 }}>{interview}</div>
                                         </div>
-                                        <div key={`i${i}`} style={{
-                                            padding: "10px 12px", borderBottom: `1px solid ${C.border}`,
-                                            color: C.text, fontWeight: survey === "—" ? 600 : 400,
-                                            background: i % 2 === 0 ? "rgba(59,130,246,0.04)" : "rgba(59,130,246,0.02)",
-                                        }}>
-                                            {interview}
-                                        </div>
-                                    </>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                /* Desktop: table layout */
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, fontSize: 13 }}>
+                                    <div style={{ padding: "10px 12px", background: C.accent, borderRadius: "8px 0 0 0", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>
+                                        Survey Captured
+                                    </div>
+                                    <div style={{ padding: "10px 12px", background: C.blue, borderRadius: "0 8px 0 0", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>
+                                        Interviews Uniquely Added
+                                    </div>
+                                    {[
+                                        ["Blackouts are the #1 complaint (14%)", "Specific $ cost: $20/game, $42/mo for Gotham Sports on top of LP"],
+                                        ["72% use social media for NBA content", "Users want Reddit-style moderated community INSIDE the app"],
+                                        ["Only 34% use Stats features", "ESPN's mobile stats UI is explicitly better; Fantasy isn't integrated"],
+                                        ["9% mention UI/UX issues", "Time-shifted viewing is broken; Prime's skip/rewind is buggy; benchmarked vs Netflix & Twitch"],
+                                        ["61% uncertain about re-subscribing", "Re-sub tied to team performance & household dynamics, not product quality"],
+                                        ["—", "Illegal streaming is a serious, easy competitor with social features LP lacks"],
+                                        ["—", "3-year Premium user didn't know about daily quiz; stadium feed is the hidden gem of Premium"],
+                                        ["—", "VPN workarounds (buying LP India) used to bypass blackouts at a fraction of cost"],
+                                    ].map(([survey, interview], i) => (
+                                        <React.Fragment key={i}>
+                                            <div style={{
+                                                padding: "10px 12px", borderBottom: `1px solid ${C.border}`,
+                                                color: survey === "—" ? C.textDim : C.textMuted,
+                                                background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+                                            }}>
+                                                {survey}
+                                            </div>
+                                            <div style={{
+                                                padding: "10px 12px", borderBottom: `1px solid ${C.border}`,
+                                                color: C.text, fontWeight: survey === "—" ? 600 : 400,
+                                                background: i % 2 === 0 ? "rgba(59,130,246,0.04)" : "rgba(59,130,246,0.02)",
+                                            }}>
+                                                {interview}
+                                            </div>
+                                        </React.Fragment>
+                                    ))}
+                                </div>
+                            )}
                             <Insight>
-                                The interviews filled three critical gaps the survey missed entirely: (1) illegal streaming as a competitive threat with social features, (2) the real dollar cost subscribers pay to work around blackouts, and (3) feature discovery failure even among loyal Premium subscribers. These qualitative insights provide the "why" and the narrative needed for a compelling MRD.
+                                The interviews filled three critical gaps the survey missed: (1) illegal streaming as a competitive threat, (2) the real dollar cost of blackout workarounds, and (3) feature discovery failure even among loyal Premium subscribers.
                             </Insight>
                         </div>
                     </div>
@@ -1217,54 +1156,56 @@ export default function NBADashboard() {
                 {tab === "mrd" && (
                     <div>
                         <SectionTitle number="1">Hypothesis Validation Summary</SectionTitle>
-
                         {[
                             {
                                 hyp: "H1: League Pass feels like a 'game-night-only' utility — fans juggle multiple apps",
-                                status: "✅ Validated",
-                                statusColor: C.green,
+                                status: "✅ Validated", statusColor: C.green,
                                 evidence: [
                                     "96% use League Pass primarily for live games; Replays (37%) and Stats (34%) are underused",
                                     "72% also use social media, 65% use sports news apps, 56% use YouTube/Twitch for NBA content",
-                                    "Average subscriber uses ~2.9 other platform categories — League Pass is not a single destination",
-                                    "🎙️ Nick: Uses Twitter, Reddit, ESPN, NBA website alongside LP — 'ESPN has better UI for stats'",
-                                    "🎙️ Arvind: Gets NBA content from Reddit, Instagram highlight accounts, and YouTube — doesn't need LP for it",
+                                    "Average subscriber uses ~2.9 other platform categories",
+                                    "🎙️ Nick: Uses Twitter, Reddit, ESPN, NBA website alongside LP",
+                                    "🎙️ Arvind: Gets NBA content from Reddit, Instagram, YouTube — doesn't need LP for it",
                                 ],
                             },
                             {
                                 hyp: "H2: Subscribers want more than passive video but don't discover other features",
-                                status: "✅ Validated",
-                                statusColor: C.green,
+                                status: "✅ Validated", statusColor: C.green,
                                 evidence: [
                                     "Only 34% use Stats features despite being available to all tiers",
-                                    "Qualitative feedback asks for multi-view, classic games, pre-game shows — features beyond basic streaming",
-                                    "36% use League Pass only 0–2 times per week, suggesting low stickiness outside game nights",
+                                    "Qualitative feedback asks for multi-view, classic games, pre-game shows",
+                                    "36% use League Pass only 0–2 times per week",
                                     "🎙️ Nick (3yr Premium): Didn't know about daily quiz. Loves stadium feed but discovered it by accident",
-                                    "🎙️ Arvind: Wants Reddit-style comments and Twitch-like interactivity — 'monetization opportunity'",
+                                    "🎙️ Arvind: Wants Reddit-style comments and Twitch-like interactivity",
                                 ],
                             },
                             {
                                 hyp: "H3: Standard subscribers don't upgrade because Premium benefits don't match their pain points",
-                                status: "✅ Validated",
-                                statusColor: C.green,
+                                status: "✅ Validated", statusColor: C.green,
                                 evidence: [
                                     "Only 32% of Standard subscribers plan to re-subscribe vs 62% for Premium",
                                     "Top complaints (blackouts, pricing) aren't solved by Premium upgrade",
-                                    "Premium benefits (no ads, 4K) don't address the 'more games' and 'better UX' needs Standard users express",
-                                    "🎙️ Juan: Re-sub depends on Heat's performance — product value alone isn't enough to retain",
-                                    "🎙️ Nick & Arvind: Illegal streams offer no blackouts + social features for free — LP's paid experience must exceed this",
+                                    "Premium benefits (no ads, 4K) don't address 'more games' and 'better UX' needs",
+                                    "🎙️ Juan: Re-sub depends on Heat's performance — product value alone isn't enough",
+                                    "🎙️ Nick & Arvind: Illegal streams offer no blackouts + social features for free",
                                 ],
                             },
                         ].map((h, i) => (
                             <div key={i} style={{
                                 background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
-                                padding: 24, marginBottom: 16,
+                                padding: cardPad, marginBottom: 16,
                             }}>
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                                <div style={{
+                                    display: "flex",
+                                    flexDirection: m ? "column" : "row",
+                                    justifyContent: "space-between",
+                                    alignItems: m ? "flex-start" : "flex-start",
+                                    marginBottom: 12, gap: 8,
+                                }}>
                                     <div style={{ fontSize: 14, fontWeight: 700, color: C.text, flex: 1, lineHeight: 1.5 }}>{h.hyp}</div>
                                     <span style={{
                                         background: `${h.statusColor}22`, color: h.statusColor, fontSize: 12,
-                                        fontWeight: 700, padding: "4px 12px", borderRadius: 20, whiteSpace: "nowrap", marginLeft: 12,
+                                        fontWeight: 700, padding: "4px 12px", borderRadius: 20, whiteSpace: "nowrap", flexShrink: 0,
                                     }}>{h.status}</span>
                                 </div>
                                 <div style={{ fontSize: 13, color: C.textMuted }}>
@@ -1279,42 +1220,22 @@ export default function NBADashboard() {
                         ))}
 
                         <SectionTitle number="2">Key Findings for MRD</SectionTitle>
-                        <div className="grid-2-sm">
+                        <div style={{
+                            display: "grid",
+                            gridTemplateColumns: m ? "1fr" : "1fr 1fr",
+                            gap: 16,
+                        }}>
                             {[
-                                {
-                                    title: "🎯 Target Segment",
-                                    body: "Standard subscribers (69% of base, n=93). Highest churn risk at 66% undecided or leaving. Largest revenue impact opportunity.",
-                                    color: C.accent,
-                                },
-                                {
-                                    title: "📊 Retention Crisis",
-                                    body: "Only 37% of all subscribers definitively plan to re-subscribe. The 39 Standard 'Still thinking' subscribers are the swing group — converting them is the #1 priority.",
-                                    color: C.gold,
-                                },
-                                {
-                                    title: "📈 Usage = Retention",
-                                    body: "88% of re-subscribers use the app 3+ times/week. Subscribers using it only 1–2×/week re-sub at just 14%. Increasing session frequency is the highest-leverage retention lever.",
-                                    color: C.green,
-                                },
-                                {
-                                    title: "⏱️ Critical Window",
-                                    body: "Subscribers who leave average 1.5 years of tenure vs 3.7 years for re-subscribers. The first 1–2 years are make-or-break — onboarding and early habit formation are essential.",
-                                    color: C.purple,
-                                },
-                                {
-                                    title: "🔀 Platform Fragmentation",
-                                    body: "Subscribers use ~3 other platform categories for NBA content. League Pass isn't winning the 'daily NBA destination' battle against social media and ESPN.",
-                                    color: C.blueLight,
-                                },
-                                {
-                                    title: "🚫 Blackout Pain",
-                                    body: "Blackouts are the #1 qualitative complaint. One subscriber literally pays for a second service to watch blacked-out home games. This drives churn directly.",
-                                    color: C.orange,
-                                },
+                                { title: "🎯 Target Segment", body: "Standard subscribers (69% of base, n=93). Highest churn risk at 66% undecided or leaving.", color: C.accent },
+                                { title: "📊 Retention Crisis", body: "Only 37% definitively plan to re-subscribe. The 39 Standard 'Still thinking' subscribers are the swing group.", color: C.gold },
+                                { title: "📈 Usage = Retention", body: "88% of re-subscribers use the app 3+ times/week. 1–2×/week re-sub at just 14%.", color: C.green },
+                                { title: "⏱️ Critical Window", body: "Leavers average 1.5 years tenure vs 3.7 for re-subscribers. First 1–2 years are make-or-break.", color: C.purple },
+                                { title: "🔀 Platform Fragmentation", body: "Subscribers use ~3 other platform categories. LP isn't the daily NBA destination.", color: C.blueLight },
+                                { title: "🚫 Blackout Pain", body: "Blackouts are the #1 complaint. One subscriber pays for a second service to watch blacked-out home games.", color: C.orange },
                             ].map((card, i) => (
                                 <div key={i} style={{
                                     background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
-                                    padding: 20, borderTop: `3px solid ${card.color}`,
+                                    padding: cardPad, borderTop: `3px solid ${card.color}`,
                                 }}>
                                     <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>{card.title}</div>
                                     <div style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.6 }}>{card.body}</div>
@@ -1323,10 +1244,7 @@ export default function NBADashboard() {
                         </div>
 
                         <SectionTitle number="3">Recommended MRD Product Direction</SectionTitle>
-                        <div style={{
-                            background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
-                            padding: 24,
-                        }}>
+                        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                             <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.7, margin: "0 0 16px" }}>
                                 Based on the survey data, the MRD should articulate three priority unmet needs as Jobs-to-be-Done:
                             </p>
@@ -1334,25 +1252,28 @@ export default function NBADashboard() {
                                 {
                                     jtbd: "When I'm following the NBA throughout the day, I want a single app that gives me scores, news, highlights, and live games — so I don't have to switch between Twitter, ESPN, YouTube, and League Pass.",
                                     priority: "HIGH",
-                                    supporting: "Survey: 72% use social media, 65% use ESPN/Yahoo, 56% use YouTube alongside LP. Interviews: Nick uses 4+ apps daily; Arvind gets NBA content from Reddit & Instagram, not LP",
+                                    supporting: "72% use social media, 65% use ESPN/Yahoo, 56% use YouTube alongside LP. Nick uses 4+ apps daily; Arvind gets content from Reddit & Instagram, not LP",
                                 },
                                 {
                                     jtbd: "When I'm paying for League Pass, I want to watch my team's games without blackouts — so I don't feel like I'm paying for a product that doesn't deliver on its core promise.",
                                     priority: "HIGH",
-                                    supporting: "Survey: #1 complaint. Interviews: Nick pays $42/mo extra for Gotham Sports; survey respondent pays for FanDuel Sports Ohio; VPN/illegal stream workarounds common",
+                                    supporting: "Nick pays $42/mo extra for Gotham Sports; survey respondent pays for FanDuel Sports Ohio; VPN/illegal stream workarounds common",
                                 },
                                 {
-                                    jtbd: "When I'm deciding whether to re-subscribe, I want to feel like League Pass offers more value than just live games — so the subscription feels worth it year-round, not just during the season.",
+                                    jtbd: "When I'm deciding whether to re-subscribe, I want to feel like League Pass offers more value than just live games — so the subscription feels worth it year-round.",
                                     priority: "MEDIUM",
-                                    supporting: "Survey: 96% use only live games; 61% uncertain about re-subscribing. Interviews: Juan's re-sub depends on team performance; Arvind says r/NBA keeps fans engaged in offseason better than LP",
+                                    supporting: "96% use only live games; 61% uncertain about re-subscribing. Juan's re-sub depends on team performance; Arvind says r/NBA keeps fans engaged in offseason better than LP",
                                 },
                             ].map((j, i) => (
                                 <div key={i} style={{
-                                    marginBottom: 20, padding: 16, borderRadius: 8,
+                                    marginBottom: 20, padding: m ? 12 : 16, borderRadius: 8,
                                     background: i === 0 ? "rgba(201,8,42,0.06)" : i === 1 ? "rgba(251,191,36,0.06)" : "rgba(59,130,246,0.06)",
                                     border: `1px solid ${i === 0 ? "rgba(201,8,42,0.15)" : i === 1 ? "rgba(251,191,36,0.15)" : "rgba(59,130,246,0.15)"}`,
                                 }}>
-                                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                                    <div style={{
+                                        display: "flex", justifyContent: "space-between",
+                                        marginBottom: 8, flexWrap: "wrap", gap: 4,
+                                    }}>
                                         <span style={{ fontSize: 11, fontWeight: 700, color: C.textDim, textTransform: "uppercase", letterSpacing: 1 }}>
                                             JTBD #{i + 1}
                                         </span>
@@ -1364,7 +1285,7 @@ export default function NBADashboard() {
                                             {j.priority} PRIORITY
                                         </span>
                                     </div>
-                                    <div style={{ fontSize: 14, fontWeight: 600, color: C.text, lineHeight: 1.5, marginBottom: 8 }}>
+                                    <div style={{ fontSize: m ? 13 : 14, fontWeight: 600, color: C.text, lineHeight: 1.5, marginBottom: 8 }}>
                                         "{j.jtbd}"
                                     </div>
                                     <div style={{ fontSize: 12, color: C.textDim }}>
