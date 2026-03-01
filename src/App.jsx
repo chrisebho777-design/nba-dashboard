@@ -404,6 +404,19 @@ const INTERVIEWEES = [
         otherApps: "Reddit (r/nba), YouTube, Instagram, ESPN app",
         color: C.purple,
     },
+    {
+        name: "Andrew",
+        tier: "Premium (shared)",
+        emoji: "🗽",
+        team: "Knicks",
+        location: "NYC (in-market)",
+        tenure: "~4 years (shared w/ brother)",
+        usage: "~2×/week, late-night West Coast games, 4th-quarter joins",
+        resubscribe: "Yes (ongoing shared sub)",
+        platform: "Phone, iPad, TV — mixed",
+        otherApps: "ESPN app, Twitter, Instagram",
+        color: C.orange,
+    },
 ];
 
 const INTERVIEW_THEMES = [
@@ -419,8 +432,9 @@ const INTERVIEW_THEMES = [
             { person: "Nick Sun", text: "The Knicks have their own app and the Nets have their own app. $20 to buy a single game. Awful experience. $25 a month for Gotham Sports just for Knicks but $42 for Knicks and Nets.", context: "Real dollar cost of blackout workarounds" },
             { person: "Arvind", text: "Blackouts were the most annoying thing. I was in Mountain View, in the Bay Area, so I could watch the Warriors. But the blackout rules were so random.", context: "Even in-market fans find blackout logic confusing" },
             { person: "Juan", text: "It depends on how good the Heat are next year.", context: "Re-subscription tied to team performance, not product value" },
+            { person: "Andrew", text: "Because Knicks games are blacked out on League Pass, I watch my team through Gotham Sports or national TV via my parents' cable provider. League Pass is primarily for other teams.", context: "In-market Premium subscriber can't use LP for his own team" },
         ],
-        insight: "Blackouts don't just frustrate users — they force subscribers to pay for additional services to watch the team they're already paying to follow. This fragments the experience and directly undermines the value proposition of League Pass.",
+        insight: "Blackouts don't just frustrate users — they force subscribers to pay for additional services to watch the team they're already paying to follow. Andrew, an in-market Knicks fan, can't even use League Pass for his primary team. This fragments the experience and directly undermines the value proposition.",
     },
     {
         id: "illegal",
@@ -450,8 +464,9 @@ const INTERVIEW_THEMES = [
             { person: "Nick Sun", text: "ESPN has better UI for the stats especially on your phone. Hard to find, doesn't load well.", context: "ESPN wins on mobile stats experience" },
             { person: "Nick Sun", text: "Every website is so bloated. Click 5 things to go to the game you want. Glitchy.", context: "Information architecture failure" },
             { person: "Arvind", text: "There's a gap between experiencing Netflix versus League Pass. Literally look at Twitch — instant reload, going back and forth, interactiveness, comments.", context: "Benchmarking against Netflix and Twitch" },
+            { person: "Andrew", text: "The home screen prioritizes news articles and power rankings. I don't think users come to the app to read content. It should open to live game scores and current action.", context: "Information architecture misaligned with core use case" },
         ],
-        insight: "Users benchmark League Pass against Netflix (quality) and Twitch (interactivity). The current experience falls short on both. Time-shifted viewing is a key use case the UI actively sabotages.",
+        insight: "Users benchmark League Pass against Netflix (quality) and Twitch (interactivity). Andrew highlights a fundamental IA problem: the app opens to editorial content, not live games. Time-shifted viewing is broken, and the home screen doesn't match why people open the app.",
     },
     {
         id: "social",
@@ -481,8 +496,9 @@ const INTERVIEW_THEMES = [
             { person: "Nick Sun", text: "Stats and watching are the core values. They should give me some kind of schedule.", context: "Wants deeper stats integration but doesn't know LP offers it" },
             { person: "Nick Sun", text: "Like NO ADs and stadium feed — that's why I pay for Premium. It plugs into the Jumbotron for breaks.", context: "Discovered Premium value accidentally" },
             { person: "Arvind", text: "When I used to play fantasy I would check stats on the app. ESPN fantasy app and NBA app. Fantasy not on NBA app.", context: "Fantasy drove engagement but LP doesn't integrate it" },
+            { person: "Andrew", text: "There's a Moments/Reels-style short video tab I had never once clicked on before the interview. I also used to use League Pass more when I played fantasy basketball — it gave me reason to watch random matchups.", context: "4-year Premium subscriber never discovered Reels tab; fantasy drove engagement but lapsed" },
         ],
-        insight: "A 3-year Premium subscriber doesn't know about the daily quiz. Features exist but aren't surfaced. This is a discovery and onboarding failure, not a feature gap.",
+        insight: "A 3-year Premium subscriber doesn't know about the daily quiz. A 4-year Premium subscriber never clicked the Reels tab. Features exist but aren't surfaced. Fantasy drove real engagement but LP doesn't integrate it. This is a discovery and onboarding failure, not a feature gap.",
     },
     {
         id: "resub",
@@ -497,8 +513,9 @@ const INTERVIEW_THEMES = [
             { person: "Nick Sun", text: "We wouldn't get a league pass if we were Knicks fans.", context: "Only works for out-of-market fans" },
             { person: "Nick Sun", text: "Overall it's a good product when you want it to work. 3 years. Best last year on YouTube TV.", context: "Value framed conditionally" },
             { person: "Michael Evans", text: "I consider myself a huge nba fan... However, I don't feel like I need to watch every game so league pass doesn't seem worth it to me... If it was cheaper.", context: "All-you-can-eat model doesn't fit; price too high" },
+            { person: "Andrew", text: "I use ESPN as my sports hub because it aggregates NBA, college basketball, NFL, and more in one place — something League Pass can't replicate. I check scores there first, then jump into LP for close 4th quarters.", context: "LP is a secondary tool, not the primary sports destination" },
         ],
-        insight: "Re-subscription decisions are driven by team performance and household dynamics, not product loyalty. LP must build value that transcends any single team's season.",
+        insight: "Re-subscription decisions are driven by team performance, household dynamics, and whether LP fits into a broader sports diet. Andrew treats LP as a secondary tool behind ESPN, only jumping in for close finishes. LP must build value that transcends any single team's season.",
     },
 ];
 
@@ -536,7 +553,7 @@ export default function NBADashboard() {
                             NBA League Pass — Survey Analysis
                         </h1>
                         <div style={{ fontSize: m ? 10 : 12, color: C.textDim, marginTop: 4 }}>
-                            Market Requirements Document · 134 Respondents · Feb 2026 · Group 3
+                            134 Respondents · Team: Anisha Subberwal, Chris Ebhogiaye, Mary Zeng, Ndeye Diarra
                         </div>
                     </div>
                 </div>
@@ -962,7 +979,7 @@ export default function NBADashboard() {
                     <div>
                         <SectionTitle number="1">Interviewee Profiles</SectionTitle>
                         <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 20, lineHeight: 1.6 }}>
-                            4 in-depth interviews conducted with League Pass subscribers / former subscribers / fans.
+                            4 in-depth interviews + 1 additional interview conducted with League Pass subscribers / former subscribers / fans.
                         </p>
 
                         <div style={{
@@ -1083,70 +1100,63 @@ export default function NBADashboard() {
 
                         <SectionTitle number="3">Interview vs. Survey — What Interviews Uniquely Revealed</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad, overflowX: "auto" }}>
-                            {m ? (
-                                /* Mobile: card-style layout instead of table */
-                                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                                    {[
-                                        ["Blackouts are the #1 complaint (14%)", "Specific $ cost: $20/game, $42/mo for Gotham Sports on top of LP"],
-                                        ["72% use social media for NBA content", "Users want Reddit-style moderated community INSIDE the app"],
-                                        ["Only 34% use Stats features", "ESPN's mobile stats UI is explicitly better; Fantasy isn't integrated"],
-                                        ["9% mention UI/UX issues", "Time-shifted viewing is broken; Prime's skip/rewind is buggy; benchmarked vs Netflix & Twitch"],
-                                        ["61% uncertain about re-subscribing", "Re-sub tied to team performance & household dynamics, not product quality"],
-                                        ["—", "Illegal streaming is a serious, easy competitor with social features LP lacks"],
-                                        ["—", "3-year Premium user didn't know about daily quiz; stadium feed is the hidden gem of Premium"],
-                                        ["—", "VPN workarounds (buying LP India) used to bypass blackouts at a fraction of cost"],
-                                    ].map(([survey, interview], i) => (
-                                        <div key={i} style={{
-                                            background: "rgba(255,255,255,0.02)", borderRadius: 8, padding: 12,
-                                            border: `1px solid ${C.border}`,
-                                        }}>
-                                            <div style={{ fontSize: 10, fontWeight: 700, color: C.accent, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Survey</div>
-                                            <div style={{ fontSize: 12, color: survey === "—" ? C.textDim : C.textMuted, marginBottom: 10 }}>{survey}</div>
-                                            <div style={{ fontSize: 10, fontWeight: 700, color: C.blueLight, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Interview Added</div>
-                                            <div style={{ fontSize: 12, color: C.text, fontWeight: survey === "—" ? 600 : 400 }}>{interview}</div>
+                            {(() => {
+                                const comparisonData = [
+                                    ["Blackouts are the #1 complaint (14%)", "Specific $ cost: $20/game, $42/mo for Gotham Sports on top of LP; in-market fans (Andrew) can't use LP for their own team"],
+                                    ["72% use social media for NBA content", "Users want Reddit-style moderated community INSIDE the app"],
+                                    ["Only 34% use Stats features", "ESPN's mobile stats UI is explicitly better; Fantasy isn't integrated"],
+                                    ["9% mention UI/UX issues", "Time-shifted viewing broken; app opens to articles not live games (Andrew); benchmarked vs Netflix & Twitch"],
+                                    ["61% uncertain about re-subscribing", "Re-sub tied to team performance & household dynamics; LP used as secondary tool behind ESPN (Andrew)"],
+                                    ["—", "Illegal streaming is a serious, easy competitor with social features LP lacks"],
+                                    ["—", "3-yr Premium didn't know about daily quiz; 4-yr Premium (Andrew) never clicked Reels tab"],
+                                    ["—", "VPN workarounds (buying LP India) used to bypass blackouts at a fraction of cost"],
+                                    ["—", "4th-quarter join pattern: users check scores elsewhere, then jump into LP only for close finishes (Andrew)"],
+                                ];
+                                return m ? (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                        {comparisonData.map(([survey, interview], i) => (
+                                            <div key={i} style={{
+                                                background: "rgba(255,255,255,0.02)", borderRadius: 8, padding: 12,
+                                                border: `1px solid ${C.border}`,
+                                            }}>
+                                                <div style={{ fontSize: 10, fontWeight: 700, color: C.accent, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Survey</div>
+                                                <div style={{ fontSize: 12, color: survey === "—" ? C.textDim : C.textMuted, marginBottom: 10 }}>{survey}</div>
+                                                <div style={{ fontSize: 10, fontWeight: 700, color: C.blueLight, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Interview Added</div>
+                                                <div style={{ fontSize: 12, color: C.text, fontWeight: survey === "—" ? 600 : 400 }}>{interview}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, fontSize: 13 }}>
+                                        <div style={{ padding: "10px 12px", background: C.accent, borderRadius: "8px 0 0 0", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>
+                                            Survey Captured
                                         </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                /* Desktop: table layout */
-                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, fontSize: 13 }}>
-                                    <div style={{ padding: "10px 12px", background: C.accent, borderRadius: "8px 0 0 0", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>
-                                        Survey Captured
+                                        <div style={{ padding: "10px 12px", background: C.blue, borderRadius: "0 8px 0 0", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>
+                                            Interviews Uniquely Added
+                                        </div>
+                                        {comparisonData.map(([survey, interview], i) => (
+                                            <React.Fragment key={i}>
+                                                <div style={{
+                                                    padding: "10px 12px", borderBottom: `1px solid ${C.border}`,
+                                                    color: survey === "—" ? C.textDim : C.textMuted,
+                                                    background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+                                                }}>
+                                                    {survey}
+                                                </div>
+                                                <div style={{
+                                                    padding: "10px 12px", borderBottom: `1px solid ${C.border}`,
+                                                    color: C.text, fontWeight: survey === "—" ? 600 : 400,
+                                                    background: i % 2 === 0 ? "rgba(59,130,246,0.04)" : "rgba(59,130,246,0.02)",
+                                                }}>
+                                                    {interview}
+                                                </div>
+                                            </React.Fragment>
+                                        ))}
                                     </div>
-                                    <div style={{ padding: "10px 12px", background: C.blue, borderRadius: "0 8px 0 0", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>
-                                        Interviews Uniquely Added
-                                    </div>
-                                    {[
-                                        ["Blackouts are the #1 complaint (14%)", "Specific $ cost: $20/game, $42/mo for Gotham Sports on top of LP"],
-                                        ["72% use social media for NBA content", "Users want Reddit-style moderated community INSIDE the app"],
-                                        ["Only 34% use Stats features", "ESPN's mobile stats UI is explicitly better; Fantasy isn't integrated"],
-                                        ["9% mention UI/UX issues", "Time-shifted viewing is broken; Prime's skip/rewind is buggy; benchmarked vs Netflix & Twitch"],
-                                        ["61% uncertain about re-subscribing", "Re-sub tied to team performance & household dynamics, not product quality"],
-                                        ["—", "Illegal streaming is a serious, easy competitor with social features LP lacks"],
-                                        ["—", "3-year Premium user didn't know about daily quiz; stadium feed is the hidden gem of Premium"],
-                                        ["—", "VPN workarounds (buying LP India) used to bypass blackouts at a fraction of cost"],
-                                    ].map(([survey, interview], i) => (
-                                        <React.Fragment key={i}>
-                                            <div style={{
-                                                padding: "10px 12px", borderBottom: `1px solid ${C.border}`,
-                                                color: survey === "—" ? C.textDim : C.textMuted,
-                                                background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
-                                            }}>
-                                                {survey}
-                                            </div>
-                                            <div style={{
-                                                padding: "10px 12px", borderBottom: `1px solid ${C.border}`,
-                                                color: C.text, fontWeight: survey === "—" ? 600 : 400,
-                                                background: i % 2 === 0 ? "rgba(59,130,246,0.04)" : "rgba(59,130,246,0.02)",
-                                            }}>
-                                                {interview}
-                                            </div>
-                                        </React.Fragment>
-                                    ))}
-                                </div>
-                            )}
+                                );
+                            })()}
                             <Insight>
-                                The interviews filled three critical gaps the survey missed: (1) illegal streaming as a competitive threat, (2) the real dollar cost of blackout workarounds, and (3) feature discovery failure even among loyal Premium subscribers.
+                                The interviews filled critical gaps the survey missed: (1) illegal streaming as a competitive threat, (2) the real dollar cost of blackout workarounds, (3) feature discovery failure even among loyal Premium subscribers, and (4) the app's information architecture prioritizes editorial content over live games (Andrew).
                             </Insight>
                         </div>
                     </div>
@@ -1166,6 +1176,7 @@ export default function NBADashboard() {
                                     "Average subscriber uses ~2.9 other platform categories",
                                     "🎙️ Nick: Uses Twitter, Reddit, ESPN, NBA website alongside LP",
                                     "🎙️ Arvind: Gets NBA content from Reddit, Instagram, YouTube — doesn't need LP for it",
+                                    "🎙️ Andrew: Uses ESPN as primary sports hub, only jumps into LP for close 4th quarters — LP is secondary",
                                 ],
                             },
                             {
@@ -1177,6 +1188,7 @@ export default function NBADashboard() {
                                     "36% use League Pass only 0–2 times per week",
                                     "🎙️ Nick (3yr Premium): Didn't know about daily quiz. Loves stadium feed but discovered it by accident",
                                     "🎙️ Arvind: Wants Reddit-style comments and Twitch-like interactivity",
+                                    "🎙️ Andrew (4yr Premium): Never clicked Reels/Moments tab; used LP more when he played fantasy basketball",
                                 ],
                             },
                             {
