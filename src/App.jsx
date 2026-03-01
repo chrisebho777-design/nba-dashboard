@@ -196,7 +196,7 @@ const ResubByTierChart = () => {
     ];
     return (
         <div>
-            <div style={{ display: "flex", gap: 16, marginBottom: 16, justifyContent: "center" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 16, justifyContent: "center" }}>
                 {categories.map(c => (
                     <div key={c.key} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.textMuted }}>
                         <div style={{ width: 10, height: 10, borderRadius: 2, background: c.color }} />
@@ -239,7 +239,7 @@ const UsageRetentionChart = () => {
     ];
     return (
         <div>
-            <div style={{ display: "flex", gap: 16, marginBottom: 20, justifyContent: "center" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 20, justifyContent: "center" }}>
                 {categories.map(c => (
                     <div key={c.key} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.textMuted }}>
                         <div style={{ width: 10, height: 10, borderRadius: 2, background: c.color }} />
@@ -265,16 +265,14 @@ const UsageRetentionChart = () => {
                 </div>
             ))}
             {/* Callout stat */}
-            <div style={{
-                display: "flex", gap: 12, marginTop: 20,
-                padding: "14px 16px", borderRadius: 8,
+            <div className="callout-flex" style={{
                 background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)",
             }}>
-                <div style={{ textAlign: "center", minWidth: 70 }}>
+                <div className="callout-left">
                     <div style={{ fontSize: 28, fontWeight: 700, color: C.green, fontFamily: "'Barlow Condensed', sans-serif", lineHeight: 1 }}>88%</div>
                     <div style={{ fontSize: 10, color: C.textDim, marginTop: 3 }}>of re-subscribers</div>
                 </div>
-                <div style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.6, borderLeft: `1px solid ${C.border}`, paddingLeft: 12 }}>
+                <div className="callout-right" style={{ color: C.textMuted }}>
                     use the app <strong style={{ color: C.text }}>3+ times per week</strong>. Among subscribers who use the app only 1–2×/week, just <strong style={{ color: C.accentLight }}>14%</strong> plan to re-subscribe. Usage frequency is the single strongest predictor of retention.
                 </div>
             </div>
@@ -303,16 +301,14 @@ const TenureChurnChart = () => (
                 <div key={d.group} style={{ flex: 1, textAlign: "center", fontSize: 11, color: C.textMuted }}>{d.group}</div>
             ))}
         </div>
-        <div style={{
-            display: "flex", gap: 12, marginTop: 20,
-            padding: "14px 16px", borderRadius: 8,
+        <div className="callout-flex" style={{
             background: "rgba(232,53,79,0.07)", border: "1px solid rgba(232,53,79,0.2)",
         }}>
-            <div style={{ textAlign: "center", minWidth: 70 }}>
+            <div className="callout-left">
                 <div style={{ fontSize: 24, fontWeight: 700, color: C.accentLight, fontFamily: "'Barlow Condensed', sans-serif", lineHeight: 1 }}>2.2 yr</div>
                 <div style={{ fontSize: 10, color: C.textDim, marginTop: 3 }}>gap</div>
             </div>
-            <div style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.6, borderLeft: `1px solid ${C.border}`, paddingLeft: 12 }}>
+            <div className="callout-right" style={{ color: C.textMuted }}>
                 Subscribers leaving average just <strong style={{ color: C.accentLight }}>1.5 years of tenure</strong>, vs <strong style={{ color: C.green }}>3.7 years</strong> for re-subscribers. The first 1–2 years are the critical retention window — if subscribers don't find value early, they're gone.
             </div>
         </div>
@@ -598,16 +594,36 @@ export default function NBADashboard() {
             fontFamily: "'DM Sans', sans-serif", padding: 0,
         }}>
             <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+            <style>{`
+                .responsive-container { padding: 0 32px 40px; max-width: 960px; margin: 0 auto; }
+                .responsive-header { padding: 28px 32px 20px; }
+                .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+                .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+                .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+                .grid-2-sm { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+                .grid-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+                .callout-flex { display: flex; gap: 12px; margin-top: 20px; padding: 14px 16px; border-radius: 8px; align-items: center; }
+                .callout-left { text-align: center; min-width: 70px; }
+                .callout-right { font-size: 12px; line-height: 1.6; border-left: 1px solid ${C.border}; padding-left: 12px; }
+                @media (max-width: 768px) {
+                    .responsive-container { padding: 0 16px 24px; }
+                    .responsive-header { padding: 20px 16px 16px; }
+                    .header-title { font-size: 22px !important; }
+                    .grid-compare { grid-template-columns: 1fr; }
+                    .callout-flex { flex-direction: column; align-items: center; text-align: center; }
+                    .callout-right { border-left: none; border-top: 1px solid ${C.border}; padding-left: 0; padding-top: 12px; margin-top: 8px; }
+                }
+            `}</style>
 
             {/* Header */}
-            <div style={{
+            <div className="responsive-header" style={{
                 background: "linear-gradient(135deg, #0b1221 0%, #1a0a0f 50%, #0b1221 100%)",
-                borderBottom: `1px solid ${C.border}`, padding: "28px 32px 20px",
+                borderBottom: `1px solid ${C.border}`,
             }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
                     <span style={{ fontSize: 28 }}>🏀</span>
                     <div>
-                        <h1 style={{
+                        <h1 className="header-title" style={{
                             margin: 0, fontSize: 26, fontWeight: 700, letterSpacing: 2,
                             fontFamily: "'Barlow Condensed', sans-serif", textTransform: "uppercase",
                             background: "linear-gradient(90deg, #fff, #e8354f)",
@@ -638,14 +654,14 @@ export default function NBADashboard() {
                 </div>
             </div>
 
-            <div style={{ padding: "0 32px 40px", maxWidth: 960, margin: "0 auto" }}>
+            <div className="responsive-container">
 
                 {/* ═══ OVERVIEW TAB ═══ */}
                 {tab === "overview" && (
                     <div>
                         <SectionTitle number="1">Sample Overview</SectionTitle>
 
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+                        <div className="grid-4">
                             <StatCard label="Respondents" value="134" accent />
                             <StatCard label="Standard Tier" value="69%" sub="93 of 134" />
                             <StatCard label="At-Risk" value="61%" sub="No or Thinking" accent />
@@ -653,7 +669,7 @@ export default function NBADashboard() {
                         </div>
 
                         <SectionTitle number="2">Demographics</SectionTitle>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                        <div className="grid-2">
                             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
                                 <h3 style={{ fontSize: 13, color: C.textMuted, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: 1 }}>Gender</h3>
                                 {DATA.demographics.gender.map(d => (
@@ -738,7 +754,7 @@ export default function NBADashboard() {
                 {tab === "segments" && (
                     <div>
                         <SectionTitle number="1">Re-subscription Intent (Overall)</SectionTitle>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+                        <div className="grid-4">
                             {DATA.resubscribe.overall.map(d => (
                                 <div key={d.label} style={{
                                     background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
@@ -766,7 +782,7 @@ export default function NBADashboard() {
 
                         <SectionTitle number="3">Price Sensitivity Among the Undecided</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+                            <div className="grid-3" style={{ marginBottom: 20 }}>
                                 <div style={{
                                     background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.2)",
                                     borderRadius: 8, padding: 16, textAlign: "center",
@@ -818,7 +834,7 @@ export default function NBADashboard() {
 
                         <SectionTitle number="4">Churn Risk Matrix</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                            <div className="grid-2-sm">
                                 <div style={{
                                     background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)",
                                     borderRadius: 8, padding: 16,
@@ -929,7 +945,7 @@ export default function NBADashboard() {
 
                         <SectionTitle number="5">Access Method</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+                            <div className="grid-4">
                                 {DATA.access.map(d => (
                                     <div key={d.label} style={{ textAlign: "center" }}>
                                         <div style={{
@@ -1050,7 +1066,7 @@ export default function NBADashboard() {
                             4 in-depth interviews conducted with League Pass subscribers / former subscribers / fans. These provide the causal "why" behind the survey's quantitative findings.
                         </p>
 
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                        <div className="grid-2-sm">
                             {INTERVIEWEES.map(p => (
                                 <div key={p.name} style={{
                                     background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
@@ -1093,7 +1109,7 @@ export default function NBADashboard() {
                                 <div style={{
                                     padding: "16px 20px", borderBottom: `1px solid ${C.border}`,
                                     background: `linear-gradient(135deg, ${t.color}11, transparent)`,
-                                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                                    display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12,
                                 }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                                         <span style={{ fontSize: 22 }}>{t.icon}</span>
@@ -1155,7 +1171,7 @@ export default function NBADashboard() {
 
                         <SectionTitle number="3">Interview vs. Survey — What Interviews Uniquely Revealed</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 24 }}>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, fontSize: 13 }}>
+                            <div className="grid-compare" style={{ fontSize: 13 }}>
                                 <div style={{ padding: "10px 12px", background: C.accent, borderRadius: "8px 0 0 0", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>
                                     Survey Captured
                                 </div>
@@ -1263,7 +1279,7 @@ export default function NBADashboard() {
                         ))}
 
                         <SectionTitle number="2">Key Findings for MRD</SectionTitle>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                        <div className="grid-2-sm">
                             {[
                                 {
                                     title: "🎯 Target Segment",
