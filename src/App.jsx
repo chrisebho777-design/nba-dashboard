@@ -193,7 +193,7 @@ const Insight = ({ children }) => (
         fontSize: 13, color: C.textMuted, lineHeight: 1.6,
         borderLeft: `3px solid ${C.accent}`,
     }}>
-        <span style={{ color: C.accentLight, fontWeight: 600, marginRight: 6 }}>💡 MRD Insight:</span>
+        <span style={{ color: C.accentLight, fontWeight: 600, marginRight: 6 }}>💡 Insight:</span>
         {children}
     </div>
 );
@@ -347,7 +347,7 @@ const TABS = [
     { id: "behavior", label: "Usage & Features" },
     { id: "qualitative", label: "Qualitative Themes" },
     { id: "interviews", label: "Interview Deep-Dives" },
-    { id: "mrd", label: "MRD Takeaways" },
+    { id: "mrd", label: "Takeaways" },
 ];
 
 // ── Interview data ──
@@ -771,10 +771,10 @@ export default function NBADashboard() {
                                 gap: 16,
                             }}>
                                 {[
-                                    { label: "✅ Low Risk — Premium \"Yes\"", value: "15 subscribers", desc: "Loyal, high-value. 62% retention rate. These are your superfans.", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.2)", color: C.green },
-                                    { label: "⚠️ Medium Risk — Standard \"Thinking\"", value: "39 subscribers", desc: "Largest swing group. Represent the biggest retention opportunity.", bg: "rgba(251,191,36,0.08)", border: "rgba(251,191,36,0.2)", color: C.gold },
-                                    { label: "🚨 High Risk — Standard \"No\"", value: "22 subscribers", desc: "Already decided to leave. Price and blackouts are top complaints.", bg: "rgba(201,8,42,0.08)", border: "rgba(201,8,42,0.2)", color: C.accentLight },
-                                    { label: "🔄 Upsell Opportunity", value: "30 Standard \"Yes\"", desc: "Committed Standard subscribers. Prime candidates for Premium upgrade.", bg: "rgba(168,85,247,0.08)", border: "rgba(168,85,247,0.2)", color: C.purple },
+                                    { label: "✅ Low Risk — Premium \"Yes\"", value: "11%", desc: "Loyal, high-value. 62% retention rate. These are your superfans.", bg: "rgba(34,197,94,0.08)", border: "rgba(34,197,94,0.2)", color: C.green },
+                                    { label: "⚠️ Medium Risk — Standard \"Thinking\"", value: "29%", desc: "Largest swing group. Represent the biggest retention opportunity.", bg: "rgba(251,191,36,0.08)", border: "rgba(251,191,36,0.2)", color: C.gold },
+                                    { label: "🚨 High Risk — Standard \"No\"", value: "16%", desc: "Already decided to leave. Price and blackouts are top complaints.", bg: "rgba(201,8,42,0.08)", border: "rgba(201,8,42,0.2)", color: C.accentLight },
+                                    { label: "🔄 Upsell Opportunity", value: "22%", desc: "Committed Standard subscribers. Prime candidates for Premium upgrade.", bg: "rgba(168,85,247,0.08)", border: "rgba(168,85,247,0.2)", color: C.purple },
                                 ].map((item, i) => (
                                     <div key={i} style={{
                                         background: item.bg, border: `1px solid ${item.border}`,
@@ -1255,7 +1255,7 @@ export default function NBADashboard() {
                             ))}
                         </div>
 
-                        <SectionTitle number="3">Recommended MRD Product Direction</SectionTitle>
+                        <SectionTitle number="3">Recommended Product Direction</SectionTitle>
                         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: cardPad }}>
                             <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.7, margin: "0 0 16px" }}>
                                 Based on the survey data, the MRD should articulate three priority unmet needs as Jobs-to-be-Done:
