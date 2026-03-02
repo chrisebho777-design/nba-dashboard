@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 // ── Color palette: NBA-inspired dark theme ──
 const C = {
@@ -553,7 +553,7 @@ export default function NBADashboard() {
                             NBA League Pass — Survey Analysis
                         </h1>
                         <div style={{ fontSize: m ? 10 : 12, color: C.textDim, marginTop: 4 }}>
-                            Market Requirements Document · 134 Respondents · Feb 2026 · Group 3
+                            134 Respondents · Team: Anisha Subberwal, Chris Ebhogiaye, Mary Zeng, Ndeye Diarra
                         </div>
                     </div>
                 </div>
